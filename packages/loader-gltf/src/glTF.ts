@@ -595,10 +595,10 @@ export function parseMesh(gltfMesh, resources) {
       const buffer = getAccessorData(gltf, accessor, buffers);
       primitive.vertexBuffers.push(buffer);
       primitive.vertexAttributes[attributeSemantic] = createAttribute(gltf, attributeSemantic, accessor, h++);
-      if (attributeSemantic === 'POSITION') {
-        primitive.boundingBoxMax = accessor.max || [Number.MAX_VALUE, Number.MAX_VALUE, Number.MAX_VALUE];
-        primitive.boundingBoxMin = accessor.min || [Number.MIN_VALUE, Number.MIN_VALUE, Number.MIN_VALUE];
-      }
+      // if (attributeSemantic === 'POSITION') {
+      //   primitive.boundingBoxMax = accessor.max || [Number.MAX_VALUE, Number.MAX_VALUE, Number.MAX_VALUE];
+      //   primitive.boundingBoxMin = accessor.min || [Number.MIN_VALUE, Number.MIN_VALUE, Number.MIN_VALUE];
+      // }
     }
 
     // load morph targets
