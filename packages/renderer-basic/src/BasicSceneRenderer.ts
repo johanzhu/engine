@@ -213,12 +213,30 @@ export class BasicSceneRenderer extends SceneVisitor {
   }
 
   /**
+   * 检测primitive状态，添加时和node的propertyChange时重新计算boundingbox
+   * @param {NodeAbility} nodeAbility
+   * @param {Primitive} primitive
+   */
+  detectPrimitive( nodeAbility: NodeAbility, primitive ) {
+    const node = nodeAbility.node;
+    if (!node) return;
+    if (!node.hasEvent(`detectPrimitive_${primitive.id}`, this.detectPrimitive as any)) {
+      node.addEventListener(`detectPrimitive_${primitive.id}`, this.detectPrimitive as any);
+      node.addEventListener('propertyChange', () => {
+        primitive.updateBoundingBox(node);
+      });
+    }
+  }
+
+  /**
    * 将一个 Primitive 对象添加到渲染队列
    * @param {NodeAbility} nodeAbility
    * @param {Primitive} primitive
    * @param {Material} mtl
    */
   pushPrimitive(nodeAbility: NodeAbility, primitive, mtl: Material) {
+
+    this.detectPrimitive(nodeAbility, primitive);
 
     if (mtl.renderType === MaterialType.TRANSPARENT) {
 
