@@ -411,7 +411,7 @@ export class Node extends EventDispatcher {
 
   private _isActiveInInHierarchy: boolean;
 
-  private propertyChangeEvnet = new Event("propertyChange");
+  private propertyChangeEvent = new Event('propertyChange', this);
 
   private _activeChangeFun;
 
@@ -959,7 +959,7 @@ export class Node extends EventDispatcher {
     }
 
     if(!mat4.equals(temp, this._modelMatrix)) {
-      this.trigger(this.propertyChangeEvnet);
+      this.trigger(this.propertyChangeEvent);
     }
 
     this._modelMatrixDirty = false;
