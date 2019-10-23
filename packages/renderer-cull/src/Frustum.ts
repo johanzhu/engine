@@ -2,6 +2,11 @@
 
 import { mat4 } from '@alipay/o3-math';
 
+interface IntersectsInfo {
+  intersect: Boolean,
+  include: Boolean
+}
+
 /**
  * 视锥体（平截头体）
  * @class
@@ -109,9 +114,9 @@ export class Frustum {
    * 与AABBox(轴对齐的包围盒)的相交测试
    * @param {vec3} boxMax 包围盒的最大坐标
    * @param {vec3} boxMin 包围盒的最小坐标
-   * @return {{intersect:boolean,include:boolean}} 部分或全部在视锥体内
+   * @return {IntersectsInfo} 部分或全部在视锥体内
    */
-  intersectsBox( boxMax, boxMin ) {
+  intersectsBox( boxMax, boxMin ): IntersectsInfo {
 
     const planes = this._planes;
     const p1 = [], p2 = [];

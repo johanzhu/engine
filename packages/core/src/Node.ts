@@ -411,7 +411,7 @@ export class Node extends EventDispatcher {
 
   private _isActiveInInHierarchy: boolean;
 
-  private propertyChangeEvent = new Event('propertyChange', this);
+  private propertyChangeEvent = new Event('propertyChange');
 
   private _activeChangeFun;
 
