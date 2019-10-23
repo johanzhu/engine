@@ -109,7 +109,7 @@ export class Frustum {
    * 与AABBox(轴对齐的包围盒)的相交测试
    * @param {vec3} boxMax 包围盒的最大坐标
    * @param {vec3} boxMin 包围盒的最小坐标
-   * @return {boolean} 返回 true 代表相交（部分或全部在视锥体内）
+   * @return {{intersect:boolean,include:boolean}} 部分或全部在视锥体内
    */
   intersectsBox( boxMax, boxMin ) {
 
@@ -129,16 +129,27 @@ export class Frustum {
       const d1 = pointDistanceToPlane( plane, p1 );
       const d2 = pointDistanceToPlane( plane, p2 );
 
-      // 是否在Plane的外侧
+      // 视锥体外
       if ( d1 < 0 && d2 < 0 ) {
-
-        return false;
-
+        return {
+          intersect: false,
+          include: false,
+        };
+      }
+      // 相交视锥体
+      if ( d1 < 0 || d2 < 0 ) {
+        return {
+          intersect: true,
+          include: false,
+        };
       }
 
     }
 
-    return true;
+    return {
+      intersect: false,
+      include: true,
+    };
 
   }
 

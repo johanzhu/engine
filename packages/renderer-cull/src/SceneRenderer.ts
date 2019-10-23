@@ -38,12 +38,11 @@ export class SceneRenderer extends BasicSceneRenderer {
     //-- 进行视锥剪裁
     if ('boundingBoxMax' in primitive && 'boundingBoxMin' in primitive) {
 
-      add = this._frustum.intersectsBox(primitive.boundingBoxMax, primitive.boundingBoxMin);
+      primitive.boundingBoxIntersectsInfo = this._frustum.intersectsBox(primitive.boundingBoxMax, primitive.boundingBoxMin);
 
     }
-
     //-- 添加到渲染队列
-    if (add) {
+    if (primitive.boundingBoxIntersectsInfo.intersect || primitive.boundingBoxIntersectsInfo.include) {
 
       super.pushPrimitive(nodeAbility, primitive, mtl);
 
