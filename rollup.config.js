@@ -77,6 +77,7 @@ async function makeRollupConfig({ location, main, name, type }) {
       plugins: [
         "@babel/plugin-proposal-export-namespace-from",
         "@babel/proposal-class-properties",
+        "@babel/plugin-transform-object-assign",
         "@babel/proposal-object-rest-spread"
       ]
     }),
@@ -96,7 +97,7 @@ async function makeRollupConfig({ location, main, name, type }) {
           name: "o3",
           file: path.join(location, pkg.browser),
           format: "umd",
-          sourcemap: true
+          sourcemap: false
         }
       ],
       plugins: [...commonPlugins, terser()]
