@@ -1,6 +1,6 @@
 import { isPowerOf2, resampleImage } from "./resampleImage";
 
-export function loadImage(url, callback, crossOrigin = true, reSample = true) {
+export function loadImage(url, callback, crossOrigin = true, reSample = false) {
   const img = new Image();
 
   // resample none 2x image
