@@ -20,6 +20,8 @@ export async function loadScene(options: Options): Promise<r3.Engine> {
 
   assets && (await loadAssets(engine, assets, options.onProgress, options.local));
 
+  options.onAssetsLoaded && options.onAssetsLoaded();
+
   parserSceneGraph(engine, sceneGraph, options);
 
   options.autoPlay && engine.run();
@@ -33,6 +35,7 @@ export interface Options {
   config?: any;
   autoPlay?: boolean;
   onProgress?: () => {};
+  onAssetsLoaded?: () => {};
   local?: boolean; // 是否本地开发环境
   rhiAttr: WebGLContextAttributes & { enableCollect?: boolean };
 }
