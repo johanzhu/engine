@@ -27,7 +27,7 @@
     "registry": "http://registry.npm.alibaba-inc.com"
   },
   "dependencies": {
-    "@alipay/o3": "^2.0.1",
-    "@alipay/o3-animator": "^2.0.0"
+    "@alipay/o3": "~2.0.1",
+    "@alipay/o3-animator": "~2.0.1"
   }
 }

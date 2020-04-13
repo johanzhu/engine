@@ -27,7 +27,7 @@
   },
   "types": "types/index.d.ts",
   "dependencies": {
-    "@alipay/o3-base": "^2.0.0",
-    "@alipay/o3-core": "^2.0.0"
+    "@alipay/o3-base": "~2.0.1",
+    "@alipay/o3-core": "~2.0.1"
   }
 }

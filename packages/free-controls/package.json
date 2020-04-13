@@ -27,9 +27,9 @@
     "registry": "http://registry.npm.alibaba-inc.com"
   },
   "dependencies": {
-    "@alipay/o3-base": "^2.0.0",
-    "@alipay/o3-core": "^2.0.0",
-    "@alipay/o3-math": "^2.0.0",
-    "@alipay/o3-tween": "^2.0.0"
+    "@alipay/o3-base": "~2.0.1",
+    "@alipay/o3-core": "~2.0.1",
+    "@alipay/o3-math": "~2.0.1",
+    "@alipay/o3-tween": "~2.0.1"
   }
 }

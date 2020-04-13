@@ -27,6 +27,6 @@
   },
   "dependencies": {
     "@alipay/draco-decoder-gltf": "^1.3.6",
-    "@alipay/o3-base": "^2.0.0"
+    "@alipay/o3-base": "~2.0.1"
   }
 }
