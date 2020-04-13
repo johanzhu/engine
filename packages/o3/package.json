@@ -1,6 +1,6 @@
 {
   "name": "@alipay/o3",
-  "version": "2.0.2",
+  "version": "2.0.3",
   "description": "",
   "repository": {
     "type": "git",
@@ -40,10 +40,10 @@
     "@alipay/o3-collision": "~2.0.1",
     "@alipay/o3-compressed-texture": "~2.0.1",
     "@alipay/o3-core": "~2.0.1",
-    "@alipay/o3-default-camera": "~2.0.2",
+    "@alipay/o3-default-camera": "^2.0.3",
     "@alipay/o3-draco": "~2.0.1",
     "@alipay/o3-engine-stats": "~2.0.1",
-    "@alipay/o3-env-probe": "~2.0.2",
+    "@alipay/o3-env-probe": "^2.0.3",
     "@alipay/o3-fog": "~2.0.1",
     "@alipay/o3-framebuffer-picker": "~2.0.1",
     "@alipay/o3-free-controls": "~2.0.1",
