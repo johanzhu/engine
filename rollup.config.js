@@ -78,7 +78,7 @@ async function makeRollupConfig({ location, main, name, type }) {
       output: [
         {
           name: "o3",
-          file: path.join(location, pkg.browser),
+          file: path.join(location, "dist/browser.min.js"),
           format: "umd",
           sourcemap: true
         }

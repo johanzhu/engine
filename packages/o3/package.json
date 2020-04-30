@@ -26,7 +26,6 @@
   "types": "types/index.d.ts",
   "main": "dist/main.js",
   "module": "dist/module.js",
-  "browser": "dist/browser.min.js",
   "publishConfig": {
     "registry": "http://registry.npm.alibaba-inc.com"
   },
