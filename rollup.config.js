@@ -36,7 +36,7 @@ const pkg = (name, type) => {
 let promises = [...fileDirs.map(name => pkg(name, "module"))];
 
 if (NODE_ENV === "BUILD") {
-  const compressDir = ["o3"];
+  const compressDir = ["o3", "schema-parser"];
   promises = [...compressDir.map(name => pkg(name, "compress"))];
 }
 
@@ -78,7 +78,7 @@ async function makeRollupConfig({ location, main, name, type }) {
       output: [
         {
           name: "o3",
-          file: path.join(location, pkg.browser),
+          file: path.join(location, 'dist/browser.min.js'),
           format: "umd",
           sourcemap: true
         }
