@@ -36,7 +36,7 @@ const pkg = (name, type) => {
 let promises = [...fileDirs.map(name => pkg(name, "module"))];
 
 if (NODE_ENV === "BUILD") {
-  const compressDir = ["o3"];
+  const compressDir = ["o3", "schema-parser"];
   promises = [...compressDir.map(name => pkg(name, "compress"))];
 }
 
