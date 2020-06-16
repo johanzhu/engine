@@ -326,6 +326,15 @@ export class Material {
       case UniformSemantic.TIME:
         values[uniform.name] = component.engine.time.timeSinceStartup * 0.001;
         break;
+      case UniformSemantic.VIEWPROJECTION: {
+        const view = camera.viewMatrix;
+        const proj = camera.projectionMatrix;
+        let VP = values[uniform.name];
+        if (!VP) VP = mat4.create();
+        mat4.mul(VP, proj, view);
+        values[uniform.name] = VP;
+        break;
+      }
     } // end of switch
   }
 }

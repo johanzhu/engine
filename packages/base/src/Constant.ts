@@ -275,7 +275,9 @@ export enum UniformSemantic {
   /** 骨骼矩阵纹理 */
   JOINTTEXTURE = 19,
   /** joint 个数 */
-  JOINTCOUNT = 20
+  JOINTCOUNT = 20,
+  /** View Projection 矩阵 */
+  VIEWPROJECTION = 21
 }
 
 /**
