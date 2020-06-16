@@ -30,23 +30,31 @@ export class GLPrimitive extends GLAsset {
 
     /** index buffer */
     if (indexBuffer) {
-      this._glIndexBuffer = gl.createBuffer();
+      if (!this._glIndexBuffer) {
+        this._glIndexBuffer = gl.createBuffer();
+      }
       gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this._glIndexBuffer);
       gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indexBuffer, gl.STATIC_DRAW);
       gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
     }
 
     /** vertex buffers*/
-    this._glVertBuffers = [];
+    if (!this._glVertBuffers.length) {
+      this._glVertBuffers = [];
+    }
     for (let i = 0, len = vertexBuffers.length; i < len; i++) {
-      this._glVertBuffers[i] = gl.createBuffer();
+      if (!this._glVertBuffers[i]) {
+        this._glVertBuffers[i] = gl.createBuffer();
+      }
       gl.bindBuffer(gl.ARRAY_BUFFER, this._glVertBuffers[i]);
       gl.bufferData(gl.ARRAY_BUFFER, vertexBuffers[i], usage);
       gl.bindBuffer(gl.ARRAY_BUFFER, null);
     }
 
     if (instancedBuffer) {
-      this._glInstancedBuffer = gl.createBuffer();
+      if (!this._glInstancedBuffer) {
+        this._glInstancedBuffer = gl.createBuffer();
+      }
       gl.bindBuffer(gl.ARRAY_BUFFER, this._glInstancedBuffer);
       gl.bufferData(gl.ARRAY_BUFFER, instancedBuffer, usage);
       gl.bindBuffer(gl.ARRAY_BUFFER, null);
