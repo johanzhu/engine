@@ -1,6 +1,6 @@
 {
   "npmClient": "tnpm",
-  "version": "2.3.1-mars.0",
+  "version": "2.3.2-mars.0",
   "bootstrap": {
     "hoist": true
   },
