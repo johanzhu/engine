@@ -39,7 +39,7 @@ export class GLPrimitive extends GLAsset {
     }
 
     /** vertex buffers*/
-    if (!this._glVertBuffers.length) {
+    if (!this._glVertBuffers) {
       this._glVertBuffers = [];
     }
     for (let i = 0, len = vertexBuffers.length; i < len; i++) {
