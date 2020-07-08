@@ -30,8 +30,14 @@ Component({
     my._createCanvas({
       id: 'canvas',
       success: (canvas) => {
-        registerCanvas(canvas, 'canvas');
-        this.props.onLoad(O3, canvas, ctx2D);
+        if(canvas) {
+          registerCanvas(canvas, 'canvas');
+          this.props.onLoad(O3, canvas, ctx2D);
+        } else {
+          if(this.props.onError) {
+            this.props.onError();
+          }
+        }
       },
     });
   },
