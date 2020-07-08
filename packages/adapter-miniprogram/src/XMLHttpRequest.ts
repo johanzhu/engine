@@ -110,12 +110,13 @@ export default class XMLHttpRequest extends EventTarget {
     } else {
       const url = this._url;
       const header = _requestHeader.get("requestHeader");
-      const responseType = this._responseType;
+      let responseType = this._responseType;
 
-      let encoding;
+      let encoding: string;
 
       if (responseType === "arraybuffer") {
-        // encoding = 'binary'
+        // 口碑和支付宝 Android 线上 10.1.98 客户端上 arraybuffer 请求异常
+        responseType = "text";
       } else {
         encoding = "utf8";
       }
