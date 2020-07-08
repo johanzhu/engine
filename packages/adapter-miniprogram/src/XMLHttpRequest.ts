@@ -115,8 +115,8 @@ export default class XMLHttpRequest extends EventTarget {
       let encoding: string;
 
       if (responseType === "arraybuffer") {
-        // 口碑和支付宝 Android 线上 10.1.98 客户端上 arraybuffer 请求异常
-        responseType = "text";
+        // 口碑和支付宝 Android 线上 10.1.98 客户端上 arraybuffer 请求异常，使用 text 无法转化成 arraybuffer
+        // responseType = "text";
       } else {
         encoding = "utf8";
       }
