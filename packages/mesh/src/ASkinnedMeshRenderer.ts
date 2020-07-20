@@ -4,7 +4,7 @@ import { Node } from "@alipay/o3-core";
 import { Mesh } from "./Mesh";
 import { Skin } from "./Skin";
 import { Texture2D } from "@alipay/o3-material";
-import { TextureFormat } from "@alipay/o3-base";
+import { TextureFormat, TextureFilterMode } from "@alipay/o3-base";
 
 /**
  * 负责渲染一个 Skinned Mesh 的组件
@@ -107,8 +107,7 @@ export class ASkinnedMeshRenderer extends AMeshRenderer {
     const rhi = this.scene.activeCameras[0]?.renderHardware;
     if (!rhi) return;
     const maxAttribUniformVec4 = rhi.renderStates.getParameter(rhi.gl.MAX_VERTEX_UNIFORM_VECTORS);
-    const maxJoints = Math.floor((maxAttribUniformVec4 - 16) / 4);
-
+    const maxJoints = Math.floor((maxAttribUniformVec4 - 20) / 4);
     if (joints.length > maxJoints && rhi.canIUseMoreJoints) {
       this._useJointTexture = true;
     }
@@ -149,7 +148,7 @@ export class ASkinnedMeshRenderer extends AMeshRenderer {
    * update matrix palette
    * @private
    */
-  onUpdate() {
+  update() {
     if (!this._hasInitJoints) {
       this._initJoints();
       this._hasInitJoints = true;
