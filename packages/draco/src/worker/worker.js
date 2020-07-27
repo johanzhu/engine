@@ -107,6 +107,7 @@ function decodeGeometry(draco, decoder, decoderBuffer, taskConfig) {
         decoder.GetTrianglesUInt32Array(dracoGeometry, dataSize, ptr);
         index = new Uint32Array(draco.HEAPU32.buffer, ptr, numIndices).slice();
         draco._free(ptr);
+        break;
       default:
         throw new Error("DRACODecoder: Unexpected index type.");
     }
