@@ -3,15 +3,14 @@ import {
   registerCanvas2D,
   dispatchTouchStart,
   dispatchTouchMove,
-  dispatchTouchEnd,
-} from '@alipay/o3-adapter-miniprogram/dist/miniprogram';
+  dispatchTouchEnd
+} from "@alipay/o3-adapter-miniprogram/dist/miniprogram";
 
-import * as O3 from '@alipay/o3/dist/miniprogram';
+import * as o3 from "@alipay/o3/dist/miniprogram";
 
 Component({
   props: {
-    onLoad: () => {
-    },
+    onLoad: () => {}
   },
   methods: {
     onTouchStart(e) {
@@ -23,22 +22,22 @@ Component({
     onTouchEnd(e) {
       dispatchTouchEnd(e);
     },
-  },
-  didMount() {
-    const ctx2D = my.createCanvasContext('canvas2D');
-    registerCanvas2D(ctx2D, 'canvas2D');
-    my._createCanvas({
-      id: 'canvas',
-      success: (canvas) => {
-        if(canvas) {
-          registerCanvas(canvas, 'canvas');
-          this.props.onLoad(O3, canvas, ctx2D);
-        } else {
-          if(this.props.onError) {
-            this.props.onError();
+    onCanvasReady() {
+      const ctx2D = my.createCanvasContext("canvas2D");
+      registerCanvas2D(ctx2D, "canvas2D");
+      my._createCanvas({
+        id: "canvas",
+        success: canvas => {
+          if (canvas) {
+            registerCanvas(canvas, "canvas");
+            this.props.onLoad(o3, canvas);
+          } else {
+            if (this.props.onError) {
+              this.props.onError();
+            }
           }
         }
-      },
-    });
-  },
+      });
+    }
+  }
 });

@@ -73,7 +73,7 @@ if (rhi.canIUse(GLCapabilityType.s3tc)) {
 }
 
 if (rhi.canIUse(GLCapabilityType.etc1)) {
-  const etc1Url = "https://gw.alipayobjects.com/os/bmw-prod/a704b7a6-b9b1-48ed-a215-04745a90b003.ktx";
+  const etc1Url = "https://gw.alipayobjects.com/os/wealthprod/407b1dfc-ca47-4123-ab67-ecb68114b9f8/93b7a7ef-2f4f-4e21-aac6-3d6d0e284201.png-etc.ktx";
   resourceLoader.batchLoad(
     [etc1Url].map(url => new Resource("etc1", { type: "ktx", url })),
     (err, resources) => {
@@ -115,7 +115,7 @@ if (rhi.canIUse(GLCapabilityType.etc)) {
 }
 
 if (rhi.canIUse(GLCapabilityType.astc)) {
-  const astc44Url = "https://gw.alipayobjects.com/os/bmw-prod/3fb9b745-e02b-425b-98e5-df6a0a058b47.ktx";
+  const astc44Url = "https://gw.alipayobjects.com/os/wealthprod/dc0cfca3-c060-4bb5-b45c-d3894b1e5524/3839a5c6-8b07-412b-b44c-7698a10ff630.png-astc.ktx";
   const astc1212Url = "https://gw.alipayobjects.com/os/bmw-prod/6465388f-81b4-45d1-86a4-731344af220b.ktx";
 
   resourceLoader.batchLoad(
@@ -137,7 +137,7 @@ if (rhi.canIUse(GLCapabilityType.astc)) {
 }
 
 if (rhi.canIUse(GLCapabilityType.pvrtc)) {
-  const pvrtc12Url = "https://gw.alipayobjects.com/os/bmw-prod/7955549e-ee62-4982-a810-d118e2fce6dd.ktx";
+  const pvrtc12Url = "https://gw.alipayobjects.com/os/wealthprod/67773e58-0f63-4cdf-bd1b-d28def65b6bb/6d51cd49-aacb-4e75-87e9-3ed7c16697fd.png-pvrtc.ktx";
   const pvrtc14Url = "https://gw.alipayobjects.com/os/bmw-prod/dc02693a-f416-4b2e-bf7b-9553c4038ce8.ktx";
   const pvrtc12rgbUrl = "https://gw.alipayobjects.com/os/bmw-prod/c8883997-3616-4811-a9bf-4d4c07015fb7.ktx";
   const pvrtc14rgbUrl = "https://gw.alipayobjects.com/os/bmw-prod/3de8467b-f626-48e3-8dd4-8cb4e7acbe4f.ktx";
@@ -163,6 +163,7 @@ if (rhi.canIUse(GLCapabilityType.pvrtc)) {
 engine.run();
 
 function renderTextures(textures, y, type) {
+  console.log(`support ${type}`);
   const w = 0.5;
   const labelNode = rootNode.createChild("label-" + type);
   labelNode.position = vec3.fromValues(-1.5, y, 0);
@@ -185,6 +186,7 @@ function renderTextures(textures, y, type) {
 }
 
 function renderNotSupport(y, type) {
+  console.log(`not support ${type}`);
   const labelNode = rootNode.createChild("label-" + type);
   labelNode.position = vec3.fromValues(0, y, 0);
   const label = labelNode.createAbility(AHUDLabel, {
