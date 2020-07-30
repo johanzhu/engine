@@ -11,6 +11,18 @@ export class EventDispatcher {
     this._listeners = {};
   }
 
+  public getListenEventTypes(): string[] {
+    return Object.keys(this._listeners).filter((type) => type.indexOf("_") !== 0);
+  }
+  /**
+   * 添加对指定事件的监听
+   * @param {string} type
+   * @param {function} listener
+   */
+  public on(type: string, listener: Listener): EventDispatcher {
+    return this.addEventListener(type, listener);
+  }
+
   /**
    * 添加对指定事件的监听
    * @param {string} type
@@ -27,6 +39,8 @@ export class EventDispatcher {
       listeners[type].push(listener);
     }
 
+    const event = new Event("_listenNewEvent");
+    this.trigger(event);
     return this;
   }
 
@@ -40,6 +54,15 @@ export class EventDispatcher {
     this.addEventListener(type, listener);
 
     return this;
+  }
+
+  /**
+   * 移除对指定事件的监听
+   * @param {string | number} type
+   * @param {function} listener
+   */
+  public off(type: string | number, listener: Listener): EventDispatcher {
+    return this.removeEventListener(type, listener);
   }
 
   /**
@@ -128,6 +151,3 @@ export class EventDispatcher {
     return this;
   }
 }
-
-(EventDispatcher.prototype as any).on = EventDispatcher.prototype.addEventListener;
-(EventDispatcher.prototype as any).off = EventDispatcher.prototype.removeEventListener;
