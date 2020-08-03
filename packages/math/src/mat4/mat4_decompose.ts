@@ -29,10 +29,9 @@ export function decompose(m, position, quaternion, scale) {
   position[2] = te[14];
 
   // scale the rotation part
-
-  const invSX = 1 / sx;
-  const invSY = 1 / sy;
-  const invSZ = 1 / sz;
+  const invSX = 1 / (sx ? sx : 1);
+  const invSY = 1 / (sy ? sy : 1);
+  const invSZ = 1 / (sz ? sy : 1);
 
   te[0] *= invSX;
   te[1] *= invSX;
