@@ -11,9 +11,16 @@ export class EventDispatcher {
     this._listeners = {};
   }
 
+  /**
+   * 获取监听的所有事件名
+   * 以_开头的不会被返回
+   * @param {string} type
+   * @param {function} listener
+   */
   public getListenEventTypes(): string[] {
     return Object.keys(this._listeners).filter((type) => type.indexOf("_") !== 0);
   }
+
   /**
    * 添加对指定事件的监听
    * @param {string} type
