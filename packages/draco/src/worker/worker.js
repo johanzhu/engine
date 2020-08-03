@@ -65,7 +65,13 @@ function decodeGeometry(draco, decoder, decoderBuffer, taskConfig) {
   // Gather all vertex attributes.
   for (let attributeName in attributeIDs) {
     const attributeType = self[attributeTypes[attributeName]];
-
+    if (!attributeType) {
+      throw new Error(
+        `DRACODecoder: can't find attribute "${attributeName}"'s type from attributeMap ${JSON.stringify(
+          attributeTypes
+        )}`
+      );
+    }
     let attribute;
     let attributeID;
 
@@ -180,7 +186,7 @@ function decodeAttribute(draco, decoder, dracoGeometry, attributeName, attribute
       break;
 
     default:
-      throw new Error("DRACODecoder: Unexpected attribute type.");
+      throw new Error(`DRACODecoder: Unexpected attribute type: ${attributeType}, attribute name: ${attributeName}`);
   }
 
   return {
