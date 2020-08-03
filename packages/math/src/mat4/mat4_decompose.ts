@@ -1,8 +1,9 @@
+import { create } from "../mat3/mat3_create";
+import { fromMat4 } from "../mat3/mat3_fromMat4";
+import { identity } from "../mat4/mat4_identity";
+import { fromMat3 } from "../quat/quat_fromMat3";
 import { copy } from "./mat4_copy";
 import { determinant } from "./mat4_determinant";
-import { fromMat4 } from "../mat3/mat3_fromMat4";
-import { create } from "../mat3/mat3_create";
-import { fromMat3 } from "../quat/quat_fromMat3";
 
 const m3 = create();
 const te = new Float32Array(16);
@@ -29,21 +30,25 @@ export function decompose(m, position, quaternion, scale) {
   position[2] = te[14];
 
   // scale the rotation part
-  const invSX = 1 / (sx ? sx : 1);
-  const invSY = 1 / (sy ? sy : 1);
-  const invSZ = 1 / (sz ? sy : 1);
+  if (sx === 0 || sy === 0 || sz === 0) {
+    identity(te);
+  } else {
+    const invSX = 1 / sx;
+    const invSY = 1 / sy;
+    const invSZ = 1 / sz;
 
-  te[0] *= invSX;
-  te[1] *= invSX;
-  te[2] *= invSX;
+    te[0] *= invSX;
+    te[1] *= invSX;
+    te[2] *= invSX;
 
-  te[4] *= invSY;
-  te[5] *= invSY;
-  te[6] *= invSY;
+    te[4] *= invSY;
+    te[5] *= invSY;
+    te[6] *= invSY;
 
-  te[8] *= invSZ;
-  te[9] *= invSZ;
-  te[10] *= invSZ;
+    te[8] *= invSZ;
+    te[9] *= invSZ;
+    te[10] *= invSZ;
+  }
 
   fromMat4(m3, te);
   fromMat3(quaternion, m3);
