@@ -5,7 +5,7 @@ import { Listener, Event } from "./Event";
  * @class
  */
 export class EventDispatcher {
-  private _listeners: { [k: string]: Listener[] };
+  private _listeners: Readonly<{ [k: string]: Listener[] }>;
 
   constructor() {
     this._listeners = {};
