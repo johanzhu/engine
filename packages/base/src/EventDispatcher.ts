@@ -17,8 +17,8 @@ export class EventDispatcher {
    * @param {string} type
    * @param {function} listener
    */
-  public getListenEventTypes(): string[] {
-    return Object.keys(this._listeners).filter((type) => type.indexOf("_") !== 0);
+  get listener(): { [k: string]: Listener[] } {
+    return this._listeners;
   }
 
   /**
@@ -45,9 +45,6 @@ export class EventDispatcher {
     if (listeners[type].indexOf(listener) === -1) {
       listeners[type].push(listener);
     }
-
-    const event = new Event("_listenNewEvent");
-    this.trigger(event);
     return this;
   }
 
