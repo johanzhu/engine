@@ -67,7 +67,9 @@ function decodeGeometry(draco, decoder, decoderBuffer, taskConfig) {
     const attributeType = self[attributeTypes[attributeName]];
     if (!attributeType) {
       throw new Error(
-        `DRACODecoder: can't find attribute "${attributeName}"'s type from attributeMap ${JSON.parse(attributeTypes)}`
+        `DRACODecoder: can't find attribute "${attributeName}"'s type from attributeMap ${JSON.stringify(
+          attributeTypes
+        )}`
       );
     }
     let attribute;
