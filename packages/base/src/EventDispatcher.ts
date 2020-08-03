@@ -45,6 +45,7 @@ export class EventDispatcher {
     if (listeners[type].indexOf(listener) === -1) {
       listeners[type].push(listener);
     }
+
     return this;
   }
 
