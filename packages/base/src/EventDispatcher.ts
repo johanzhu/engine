@@ -5,13 +5,13 @@ import { Listener, Event } from "./Event";
  * @class
  */
 export class EventDispatcher {
-  private _listeners: Readonly<{ [k: string]: Listener[] }>;
+  private _listeners: { [k: string]: Listener[] };
 
   constructor() {
     this._listeners = {};
   }
 
-  get listeners(): { [k: string]: Listener[] } {
+  get listeners(): Readonly<{ [k: string]: Listener[] }> {
     return this._listeners;
   }
 
