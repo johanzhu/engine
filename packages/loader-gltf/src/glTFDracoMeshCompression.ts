@@ -24,6 +24,11 @@ export const glTFDracoMeshCompression = {
       if (gltfAttributeMap[attributeName] !== undefined) {
         const accessorDef = accessors[gltfPrimitive.attributes[attributeName]];
         attributeTypeMap[attributeName] = getComponentType(accessorDef.componentType).name;
+        if (!attributeTypeMap[attributeName]) {
+          throw new Error(
+            `can't get componentType from accessor ${JSON.stringify(accessorDef)}, gltf: ${JSON.stringify(gltf)}`
+          );
+        }
       }
     }
     const indexAccessor = accessors[gltfPrimitive.indices];
@@ -35,7 +40,7 @@ export const glTFDracoMeshCompression = {
       indexType
     };
     const buffer = getBufferData(bufferViews[bufferViewIndex], buffers);
-    return decoder.decode(buffer, taskConfig).then(geometry => {
+    return decoder.decode(buffer, taskConfig).then((geometry) => {
       let h = 0;
       for (let i = 0; i < geometry.attributes.length; i++) {
         const attribute = geometry.attributes[i];
