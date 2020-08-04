@@ -25,9 +25,7 @@ export const glTFDracoMeshCompression = {
         const accessorDef = accessors[gltfPrimitive.attributes[attributeName]];
         attributeTypeMap[attributeName] = getComponentType(accessorDef.componentType).name;
         if (!attributeTypeMap[attributeName]) {
-          throw new Error(
-            `can't get componentType from accessor ${JSON.stringify(accessorDef)}, gltf: ${JSON.stringify(gltf)}`
-          );
+          throw new Error(`can't get componentType from accessor ${JSON.stringify(accessorDef)}`);
         }
       }
     }
