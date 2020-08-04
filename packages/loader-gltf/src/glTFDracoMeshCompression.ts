@@ -1,5 +1,5 @@
 import { DRACODecoder } from "@alipay/o3-draco";
-import { getComponentType, createAttribute, getBufferData } from "./Util";
+import { getComponentTypeName, createAttribute, getBufferData } from "./Util";
 
 let decoder;
 
@@ -23,14 +23,11 @@ export const glTFDracoMeshCompression = {
     for (let attributeName in gltfPrimitive.attributes) {
       if (gltfAttributeMap[attributeName] !== undefined) {
         const accessorDef = accessors[gltfPrimitive.attributes[attributeName]];
-        attributeTypeMap[attributeName] = getComponentType(accessorDef.componentType).name;
-        if (!attributeTypeMap[attributeName]) {
-          throw new Error(`can't get componentType from accessor ${JSON.stringify(accessorDef)}`);
-        }
+        attributeTypeMap[attributeName] = getComponentTypeName(accessorDef.componentType);
       }
     }
     const indexAccessor = accessors[gltfPrimitive.indices];
-    const indexType = getComponentType(indexAccessor.componentType).name;
+    const indexType = getComponentTypeName(indexAccessor.componentType);
     const taskConfig = {
       attributeIDs: attributeMap,
       attributeTypes: attributeTypeMap,

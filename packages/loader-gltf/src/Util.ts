@@ -9,6 +9,16 @@ const WEBGL_COMPONENT_TYPES = {
   5126: Float32Array
 };
 
+// 有些环境下，Float32Array.name 为空，怀疑name被delete了
+const WEBGL_COMPONENT_TYPES_NAME = {
+  5120: "Int8Array",
+  5121: "Uint8Array",
+  5122: "Int16Array",
+  5123: "Uint16Array",
+  5125: "Uint32Array",
+  5126: "Float32Array"
+};
+
 /**
  * 解析二进制文本 用于 glb loader
  * @param array
@@ -71,6 +81,14 @@ export function getAccessorTypeSize(accessorType) {
  */
 export function getComponentType(componentType) {
   return WEBGL_COMPONENT_TYPES[componentType];
+}
+
+/** 获取 component type 对应的 TypedArray Name
+ * @return {function}
+ * @param {string} componentType
+ */
+export function getComponentTypeName(componentType) {
+  return WEBGL_COMPONENT_TYPES_NAME[componentType];
 }
 
 /**
