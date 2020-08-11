@@ -22,6 +22,7 @@
   "types": "types/index.d.ts",
   "main": "dist/main.js",
   "module": "dist/module.js",
+  "browser": "dist/index.umd.js",
   "publishConfig": {
     "registry": "http://registry.npm.alibaba-inc.com"
   },

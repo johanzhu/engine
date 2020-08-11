@@ -8,7 +8,7 @@ import babel from "rollup-plugin-babel";
 import string from "@ali/rollup-plugin-string";
 import { terser } from "rollup-plugin-terser";
 import miniProgramPlugin from "./rollup.miniprogram.plugin";
-import visualizer from 'rollup-plugin-visualizer';
+import visualizer from "rollup-plugin-visualizer";
 const readFile = promisify(fs.readFile);
 
 const { LERNA_PACKAGE_NAME, PWD, NODE_ENV } = process.env;
@@ -84,7 +84,7 @@ async function makeRollupConfig({ location, main, name, type }) {
           sourcemap: true
         }
       ],
-      plugins: [...commonPlugins, terser(), visualizer({template: 'sunburst'})]
+      plugins: [...commonPlugins, terser(), visualizer({ template: "sunburst" })]
     };
   }
   if (isMiniProgram) {
@@ -106,21 +106,37 @@ async function makeRollupConfig({ location, main, name, type }) {
   // const external = name === "o3-plus" ? {} : Object.keys(pkg.dependencies || {});
   const external = Object.keys(pkg.dependencies || {});
 
+  const output = [
+    {
+      format: "cjs",
+      file: path.join(location, pkg.main),
+      sourcemap: true
+    },
+    {
+      file: path.join(location, pkg.module),
+      format: "es",
+      sourcemap: true
+    }
+  ];
+
+  const plugins = [...commonPlugins];
+
+  if (name === "schema-parser") {
+    output.push({
+      file: path.join(location, pkg.browser),
+      format: "umd",
+      name,
+      globals: {
+        "@alipay/o3": "o3"
+      }
+    });
+    plugins.push(terser());
+  }
+
   return {
     input,
     external,
-    output: [
-      {
-        format: "cjs",
-        file: path.join(location, pkg.main),
-        sourcemap: true
-      },
-      {
-        file: path.join(location, pkg.module),
-        format: "es",
-        sourcemap: true
-      }
-    ],
-    plugins: [...commonPlugins]
+    output,
+    plugins
   };
 }
