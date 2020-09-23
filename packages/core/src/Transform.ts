@@ -423,9 +423,7 @@ export class Transform extends NodeAbility {
   }
 
   _onDestroy() {
-    for (let i = 0, len = this._changeFlags.length; i < len; i++) {
-      this._changeFlags[i].destroy();
-    }
+    this._changeFlags = null;
   }
 
   /**
