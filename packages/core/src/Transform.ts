@@ -422,10 +422,6 @@ export class Transform extends NodeAbility {
     return flag;
   }
 
-  _onDestroy() {
-    this._changeFlags = null;
-  }
-
   /**
    * @internal
    */
