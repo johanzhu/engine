@@ -114,21 +114,5 @@ export class GLPrimitive extends GLAsset {
   /**
    * 释放 GL 资源
    */
-  finalize() {
-    const primitive = this._primitive;
-    const vertexBufferBindings = primitive.vertexBufferBindings;
-    const indexBuffer = primitive.indexBufferBinding.buffer;
-
-    if (vertexBufferBindings.length > 0) {
-      for (let i = 0; i < vertexBufferBindings.length; i++) {
-        const vertexBuffer = vertexBufferBindings[i].buffer;
-        vertexBuffer.destroy();
-      }
-    }
-
-    if (indexBuffer) {
-      indexBuffer.destroy();
-      // primitive.indexBufferBinding.buffer = null;
-    }
-  }
+  finalize() {}
 }

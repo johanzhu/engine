@@ -59,6 +59,7 @@ export class GLAssetsCache {
     }
 
     cachedObject.activeFrame = this._rhi.frameCount;
+    asset.glAsset = cachedObject;
     return cachedObject;
   }
 
