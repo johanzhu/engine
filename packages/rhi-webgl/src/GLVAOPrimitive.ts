@@ -84,5 +84,6 @@ export class GLVAOPrimitive extends GLPrimitive {
     this.vao.forEach((vao) => {
       gl.deleteVertexArray(vao);
     });
+    this.vao = null;
   }
 }

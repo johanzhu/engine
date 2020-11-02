@@ -170,6 +170,11 @@ export class Primitive extends AssetObject {
 
     this._vertexElements = null;
     this._vertexElementMap = null;
+
+    if (this.glAsset) {
+      this.glAsset.finalize();
+      this.glAsset = null;
+    }
   }
 
   private _addVertexElement(element: VertexElement): void {
