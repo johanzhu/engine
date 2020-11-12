@@ -138,7 +138,7 @@ export class VertexBuffer {
     this.bind();
 
     if (options === SetDataOptions.Discard) {
-      gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, this._byteLength, this._glBufferUsage);
+      gl.bufferData(gl.ARRAY_BUFFER, this._byteLength, this._glBufferUsage);
     }
 
     const byteSize = (<Uint8Array>data).BYTES_PER_ELEMENT || 1; //TypeArray is BYTES_PER_ELEMENT , unTypeArray is 1
