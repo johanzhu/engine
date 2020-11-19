@@ -41,6 +41,7 @@ export class Engine extends EventDispatcher {
   private _timeoutId: number;
   private _loopCounter: number = 0;
   private _targetFrameInterval: number = 1000 / 60;
+  private _destroyed = false;
 
   private _animate = () => {
     if (this._vSyncCount) {
@@ -207,6 +208,10 @@ export class Engine extends EventDispatcher {
    * 销毁引擎。
    */
   destroy(): void {
+    if (this._destroyed) {
+      return;
+    }
+    this._destroyed = true;
     // -- event
     this.trigger(new Event("shutdown", this));
     engineFeatureManager.callFeatureMethod(this, "shutdown", [this]);
