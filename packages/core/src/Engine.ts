@@ -148,7 +148,12 @@ export class Engine extends EventDispatcher {
     let c: HTMLCanvasElement;
     if (typeof canvas === "string") {
       c = document.getElementById(canvas) as HTMLCanvasElement;
-    } else if (canvas instanceof HTMLCanvasElement) {
+    } else if (canvas instanceof HTMLCanvasElement
+            || Object.prototype.toString.call(canvas) === '[object Object]' 
+            || Object.prototype.toString.call(canvas) === '[object JSIInterface]'
+            || Object.prototype.toString.call(canvas) === '[object Canvas]'
+      ) {
+      // canvas后面三种判断是兼容小程序插件场景instanceof判断出问题的场景
       c = canvas;
     }
 
