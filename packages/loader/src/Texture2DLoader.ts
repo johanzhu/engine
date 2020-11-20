@@ -10,7 +10,6 @@ class Texture2DLoader extends Loader<Texture2D> {
       })
         .then((image) => {
           const texture = new Texture2D(image.width, image.height, undefined, undefined, resourceManager.engine);
-          texture.name = name;
           if (!texture._glTexture) return;
           texture.setImageSource(image);
           texture.generateMipmaps();

@@ -30,7 +30,6 @@ class TextureCubeLoader extends Loader<TextureCubeMap> {
           }
 
           const tex = new TextureCubeMap(width, undefined, undefined, resourceManager.engine);
-          tex.name = name;
 
           if (!tex._glTexture) return;
 
