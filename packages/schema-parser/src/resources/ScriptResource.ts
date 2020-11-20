@@ -29,7 +29,7 @@ export class ScriptResource extends SchemaResource {
 
   load(resourceLoader: o3.ResourceLoader, assetConfig: AssetConfig, oasis: Oasis): Promise<ScriptResource> {
     this.initScriptContext();
-    return new Promise(resolve => {
+    return new Promise((resolve) => {
       const config = assetConfig as any;
       const name = config.props.scripts[0].name;
       if (!this.resourceManager.isLocal) {
@@ -45,7 +45,7 @@ export class ScriptResource extends SchemaResource {
         scriptDom.src = assetConfig.url;
         document.body.appendChild(scriptDom);
       } else {
-        scriptAbility[name] = oasis.options?.scripts[name];
+        scriptAbility[name] = oasis.options?.scripts ? oasis.options?.scripts[name] : null;
         resolve(this);
       }
     });
