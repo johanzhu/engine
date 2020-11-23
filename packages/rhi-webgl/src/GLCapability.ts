@@ -160,8 +160,9 @@ export class GLCapability {
         const extensionKey = flatItem[glKey];
         const extensionVal = ext[extensionKey];
 
+        // 兼容小程序插件场景下instanceof判断失效
         if (extensionVal instanceof Function
-           || Object.prototype.toString.call(extensionVal) === "[object Function]") {
+           || (typeof extensionVal) ===  "function") {
           gl[glKey] = extensionVal.bind(ext);
         } else {
           gl[glKey] = extensionVal;
