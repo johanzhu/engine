@@ -2,10 +2,16 @@ import { Quaternion } from "@oasis-engine/math";
 import { Component } from "../Component";
 import { Entity } from "../Entity";
 import { SkinnedMeshRenderer } from "../mesh/SkinnedMeshRenderer";
-import { InterpolationType, WrapMode } from "./AnimationConst";
+import { InterpolationType, WrapMode, AnimationEventType } from "./AnimationConst";
 
 export interface AnimationOptions {
   wrapMode?: WrapMode;
+  events?: AnimationEvent[];
+}
+
+export interface AnimationEvent {
+  type: AnimationEventType;
+  callback: Function;
 }
 
 export interface IChannelState {

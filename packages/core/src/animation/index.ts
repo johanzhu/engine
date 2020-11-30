@@ -1,3 +1,3 @@
 export { Animation } from "./Animation";
 export { AnimationClip } from "./AnimationClip";
-export { AnimationEvent, WrapMode, InterpolationType } from "./AnimationConst";
+export { AnimationEventType as AnimationEvent, WrapMode, InterpolationType } from "./AnimationConst";

@@ -15,7 +15,7 @@ export enum WrapMode {
  * 动画事件类型
  * @readonly
  */
-export enum AnimationEvent {
+export enum AnimationEventType {
   /** 播放模式为 WrapMode.ONCE，结束后触发 */
   FINISHED = 0,
   /** 播放模式为 WrapMode.LOOP，每次循环结束后触发 */
