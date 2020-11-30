@@ -5,7 +5,7 @@ import { Component } from "../Component";
 import { Entity } from "../Entity";
 import { SkinnedMeshRenderer } from "../mesh/SkinnedMeshRenderer";
 import { AnimationClip } from "./AnimationClip";
-import { AnimationEvent, WrapMode } from "./AnimationConst";
+import { AnimationEventType, WrapMode } from "./AnimationConst";
 import { AnimationOptions, IChannelState, IChannelTarget } from "./types";
 
 /**
@@ -382,7 +382,7 @@ export class AnimationLayer extends EventDispatcher {
       for (let i = options.events.length - 1; i >= 0; i--) {
         const event = options.events[i];
         let eventType = event.type;
-        if (event.type === AnimationEvent.FRAME_EVENT) {
+        if (event.type === AnimationEventType.FRAME_EVENT) {
           eventType = "frameEvent" + frameEventIndex;
           frameEventIndex++;
           this._frameEvents.push({
@@ -428,13 +428,13 @@ export class AnimationLayer extends EventDispatcher {
         }
         // 激活Loop End Event
         // @ts-ignore
-        if (this.hasEvent(AnimationEvent.LOOP_END)) {
-          this._activedEvents.push(new Event(AnimationEvent.LOOP_END, this));
+        if (this.hasEvent(AnimationEventType.LOOP_END)) {
+          this._activedEvents.push(new Event(AnimationEventType.LOOP_END, this));
         }
         // @ts-ignore
-      } else if (this.hasEvent(AnimationEvent.FINISHED)) {
+      } else if (this.hasEvent(AnimationEventType.FINISHED)) {
         // 激活Finish Event
-        this._activedEvents.push(new Event(AnimationEvent.FINISHED, this));
+        this._activedEvents.push(new Event(AnimationEventType.FINISHED, this));
       }
     }
   }
