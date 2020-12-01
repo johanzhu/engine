@@ -373,9 +373,10 @@ export class Camera extends Component {
    * @returns 射线
    */
   screenToViewportPoint<T extends Vector2 | Vector3>(point: Vector3 | Vector2, out: T): T {
+    const canvas = this.engine.canvas;
     const viewport = this.viewport;
-    out.x = (point.x - viewport.x) / viewport.z;
-    out.y = (point.y - viewport.y) / viewport.w;
+    out.x = (point.x / canvas.width - viewport.x) / viewport.z;
+    out.y = (point.y / canvas.height - viewport.y) / viewport.w;
     return out;
   }
 
