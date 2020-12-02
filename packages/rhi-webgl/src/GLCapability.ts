@@ -202,7 +202,7 @@ export class GLCapability {
         const extensionKey = flatItem[glKey];
         const extensionVal = ext[extensionKey];
 
-        if (extensionVal instanceof Function) {
+        if (extensionVal?.bind) {
           gl[glKey] = extensionVal.bind(ext);
         } else {
           gl[glKey] = extensionVal;
