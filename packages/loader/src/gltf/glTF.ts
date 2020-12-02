@@ -385,16 +385,6 @@ export function parseMaterial(gltfMaterial, resources) {
   return Promise.resolve(material);
 }
 
-function parseCamera(cameraOptions: Camera, resources: GLTFParsed) {
-  const { cameras } = resources.asset;
-  if (cameraOptions.type === "orthographic") {
-  }
-  // cameras.push()
-  // debugger;
-  // console.log(cameraOptions);
-  // console.log(resources);
-}
-
 /**
  * 解析蒙皮
  * @param gltfSkin
