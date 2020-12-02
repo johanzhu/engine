@@ -27,10 +27,12 @@ import {
   TypedArray,
   Util,
   VertexBufferBinding,
-  VertexElement
+  VertexElement,
+  Camera as OasisCamera
 } from "@oasis-engine/core";
 import { Matrix, Quaternion, Vector3, Vector4 } from "@oasis-engine/math";
-import { LoadedGLTFResource } from "../GLTF";
+import { Camera, LoadedGLTFResource } from "../GLTF";
+import { Oasis } from "../scene-loader";
 import { glTFDracoMeshCompression } from "./glTFDracoMeshCompression";
 import {
   createVertexElement,
@@ -133,6 +135,7 @@ export class GLTFResource extends EngineObject {
   materials?: Material[];
   meshes?: Mesh[];
   skins?: Skin[];
+  cameras?: OasisCamera[];
   meta: any;
 }
 
@@ -160,13 +163,16 @@ export function parseGLTF(data: LoadedGLTFResource, engine: Engine): Promise<GLT
 
   parseExtensions(resources);
   // parse all related resources
-  return parseResources(resources, "materials", parseMaterial)
-    .then(() => parseResources(resources, "meshes", parseMesh))
-    .then(() => parseResources(resources, "nodes", parseNode))
-    .then(() => parseResources(resources, "scenes", parseScene))
-    .then(() => parseResources(resources, "skins", parseSkin))
-    .then(() => parseResources(resources, "animations", parseAnimation))
-    .then(() => buildSceneGraph(resources));
+  return (
+    parseResources(resources, "materials", parseMaterial)
+      .then(() => parseResources(resources, "meshes", parseMesh))
+      // .then(() => parseResources(resources, "cameras", parseCamera))
+      .then(() => parseResources(resources, "nodes", parseNode))
+      .then(() => parseResources(resources, "scenes", parseScene))
+      .then(() => parseResources(resources, "skins", parseSkin))
+      .then(() => parseResources(resources, "animations", parseAnimation))
+      .then(() => buildSceneGraph(resources))
+  );
 }
 
 function parseExtensions(resources) {
@@ -368,35 +374,12 @@ export function parseMaterial(gltfMaterial, resources) {
   } else {
     const techniqueName = gltfMaterial.technique;
     Logger.warn("Deprecated: Please use a model that meets the glTF 2.0 specification");
-    const MaterialType = RegistedCustomMaterials[techniqueName];
-    material = new MaterialType();
-  }
-
-  if (gltfMaterial.hasOwnProperty("values")) {
-    Logger.warn("Deprecated: Please use a model that meets the glTF 2.0 specification");
-    for (const paramName in gltfMaterial.values) {
-      if (!material.technique) {
-        Logger.warn("Cant not find technique");
-        continue;
-      }
-      const uniform = findByKeyValue(material.technique.uniforms, "paramName", paramName);
-      if (!uniform) {
-        Logger.warn("Cant not find uniform: " + paramName);
-        continue;
-      }
-
-      const name = uniform.name;
-      const type = uniform.type;
-      if (type === DataType.SAMPLER_2D) {
-        let textureIndex = gltfMaterial.values[paramName];
-        if (Util.isArray(textureIndex)) {
-          textureIndex = textureIndex[0];
-        }
-        const texture = getItemByIdx("textures", textureIndex, resources, false);
-        material.setValue(name, texture);
-      } else {
-        material.setValue(name, gltfMaterial.values[paramName]);
-      }
+    // TODO: 加坨 shi，未来支持 KHR_UNLIT_MATERIAL
+    if (techniqueName === "Texture") {
+      material = new PBRMaterial(resources.engine, gltfMaterial.name || PBRMaterial.MATERIAL_NAME);
+      material.unlit = true;
+      const index = gltfMaterial.values._MainTex[0];
+      material.baseColorTexture = getItemByIdx("textures", index || 0, resources, false);
     }
   }
   return Promise.resolve(material);
@@ -495,51 +478,7 @@ function parsePrimitiveVertex(
   return Promise.resolve(primitive);
 }
 
-function parserPrimitiveTarget(primitive, gltfPrimitive, gltf, buffers) {
-  // // load morph targets
-  // if (gltfPrimitive.hasOwnProperty("targets")) {
-  //   let accessorIdx, accessor, buffer;
-  //   let attributeCount = primitive.vertexBuffers.length;
-  //   for (let j = 0; j < gltfPrimitive.targets.length; j++) {
-  //     const target = gltfPrimitive.targets[j];
-  //     for (const attributeSemantic in target) {
-  //       switch (attributeSemantic) {
-  //         case "POSITION":
-  //           accessorIdx = target.POSITION;
-  //           accessor = gltf.accessors[accessorIdx];
-  //           buffer = getAccessorData(gltf, accessor, buffers);
-  //           primitive.vertexBuffers.push(buffer);
-  //           const posAttrib = createAttribute(gltf, `POSITION_${j}`, accessor, attributeCount++);
-  //           primitive.vertexAttributes[`POSITION_${j}`] = posAttrib;
-  //           target["POSITION"] = { ...posAttrib };
-  //           break;
-  //         case "NORMAL":
-  //           accessorIdx = target.NORMAL;
-  //           accessor = gltf.accessors[accessorIdx];
-  //           buffer = getAccessorData(gltf, accessor, buffers);
-  //           primitive.vertexBuffers.push(buffer);
-  //           const normalAttrib = createAttribute(gltf, `NORMAL_${j}`, accessor, attributeCount++);
-  //           primitive.vertexAttributes[`NORMAL_${j}`] = normalAttrib;
-  //           target["NORMAL"] = { ...normalAttrib };
-  //           break;
-  //         case "TANGENT":
-  //           accessorIdx = target.TANGENT;
-  //           accessor = gltf.accessors[accessorIdx];
-  //           buffer = getAccessorData(gltf, accessor, buffers);
-  //           primitive.vertexBuffers.push(buffer);
-  //           const tangentAttrib = createAttribute(gltf, `TANGENT_${j}`, accessor, attributeCount++);
-  //           primitive.vertexAttributes[`TANGENT_${j}`] = tangentAttrib;
-  //           target["TANGENT"] = { ...tangentAttrib };
-  //           break;
-  //         default:
-  //           Logger.error(`unknown morth target semantic "${attributeSemantic}"`);
-  //           break;
-  //       }
-  //       primitive.targets.push(target);
-  //     }
-  //   }
-  // }
-}
+function parserPrimitiveTarget(primitive, gltfPrimitive, gltf, buffers) {}
 
 /**
  * 解析 Mesh
@@ -703,7 +642,7 @@ export function parseAnimation(gltfAnimation, resources) {
  * @param resources
  * @private
  */
-export function parseNode(gltfNode, resources) {
+export function parseNode(gltfNode, resources: GLTFParsed) {
   // TODO: undefined name?
   const entity = new Entity(resources.engine, gltfNode.name || `GLTF_NODE_${nodeCount++}`);
 
@@ -716,9 +655,9 @@ export function parseNode(gltfNode, resources) {
     const rot = new Quaternion();
     mat.decompose(pos, rot, scale);
 
-    entity.position = pos;
-    entity.rotation = rot;
-    entity.scale = scale;
+    entity.transform.position = pos;
+    entity.transform.rotationQuaternion = rot;
+    entity.transform.scale = scale;
   } else {
     for (const key in TARGET_PATH_MAP) {
       if (gltfNode.hasOwnProperty(key)) {
@@ -738,6 +677,44 @@ export function parseNode(gltfNode, resources) {
           }
           entity[mapKey] = obj;
         }
+      }
+    }
+  }
+
+  if (gltfNode.camera !== undefined) {
+    const cameraOptions = resources.gltf.cameras[gltfNode.camera];
+    const camera = entity.addComponent(OasisCamera);
+    if (cameraOptions.type === "orthographic") {
+      camera.isOrthographic = true;
+      let { ymag, xmag, zfar, znear } = cameraOptions.orthographic;
+      if (znear !== undefined) {
+        camera.nearClipPlane = znear;
+      }
+      if (zfar !== undefined) {
+        camera.farClipPlane = zfar;
+      }
+      if (ymag && xmag) {
+        camera.orthographicSize = Math.max(ymag, xmag) / 2;
+      }
+      if (ymag !== undefined && xmag) {
+        camera.orthographicSize = xmag / 2;
+      }
+      if (xmag !== undefined && ymag) {
+        camera.orthographicSize = ymag / 2;
+      }
+    } else {
+      const { aspectRatio, yfov, zfar, znear } = cameraOptions.perspective;
+      if (aspectRatio !== undefined) {
+        camera.aspectRatio = aspectRatio;
+      }
+      if (yfov !== undefined) {
+        camera.fieldOfView = yfov;
+      }
+      if (zfar !== undefined) {
+        camera.farClipPlane = zfar;
+      }
+      if (znear !== undefined) {
+        camera.nearClipPlane = znear;
       }
     }
   }
