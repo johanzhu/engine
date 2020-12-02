@@ -202,6 +202,7 @@ export class GLCapability {
         const extensionKey = flatItem[glKey];
         const extensionVal = ext[extensionKey];
 
+        // 小程序 hack 了原生的 Function，用是否有 .bind 去判断是否是 Function
         if (extensionVal?.bind) {
           gl[glKey] = extensionVal.bind(ext);
         } else {
