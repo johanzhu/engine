@@ -134,6 +134,34 @@ export class Scene extends EventDispatcher {
   }
 
   /**
+   * 根据名字全局查找实体。
+   * @param name 节点名称
+   * @returns 实体
+   */
+  findByName(name: string) {
+    const children = this._rootEntities;
+    const child = Entity.findByPath(this, name);
+    if (child) return child;
+    for (let i = children.length - 1; i >= 0; i--) {
+      const child = children[i];
+      const grandson = child.findByName(name);
+      if (grandson) {
+        return grandson;
+      }
+    }
+    return null;
+  }
+
+  /**
+   * 根据路径全局查找实体，使用‘/’符号作为路径分割符。
+   * @param entityPath
+   * @returns 实体
+   */
+  findByPath(entityPath: string) {
+    return Entity.findByPath(this, entityPath);
+  }
+
+  /**
    * 销毁场景。
    */
   destroy(): void {
