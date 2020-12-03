@@ -138,15 +138,20 @@ export class Scene extends EventDispatcher {
    * @param name 节点名称
    * @returns 实体
    */
-  findByName(name: string) {
+  findEntityByName(name: string): Entity | null {
     const children = this._rootEntities;
-    const child = Entity.findByPath(this, name);
-    if (child) return child;
     for (let i = children.length - 1; i >= 0; i--) {
       const child = children[i];
-      const grandson = child.findByName(name);
-      if (grandson) {
-        return grandson;
+      if (child.name === name) {
+        return child;
+      }
+    }
+
+    for (let i = children.length - 1; i >= 0; i--) {
+      const child = children[i];
+      const entity = child.findByName(name);
+      if (entity) {
+        return entity;
       }
     }
     return null;
@@ -157,7 +162,7 @@ export class Scene extends EventDispatcher {
    * @param entityPath
    * @returns 实体
    */
-  findByPath(entityPath: string) {
+  findEntityByPath(entityPath: string): Entity | null {
     return Entity.findByPath(this, entityPath);
   }
 
