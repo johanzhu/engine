@@ -704,9 +704,10 @@ export function parseNode(gltfNode, resources: GLTFParsed) {
       }
     } else {
       const { aspectRatio, yfov, zfar, znear } = cameraOptions.perspective;
-      if (aspectRatio !== undefined) {
-        camera.aspectRatio = aspectRatio;
-      }
+      // 移动端相机普遍根据设备的宽高比去定义 aspectRatio，不以导出的相机参数为准。
+      // if (aspectRatio !== undefined) {
+      // camera.aspectRatio = aspectRatio;
+      // }
       if (yfov !== undefined) {
         camera.fieldOfView = yfov;
       }
