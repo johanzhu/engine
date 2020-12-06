@@ -1,4 +1,4 @@
-import { GLCapabilityType, ResourceManager } from "@oasis-engine/core";
+import { AssetType, GLCapabilityType, ResourceManager } from "@oasis-engine/core";
 import { Oasis } from "../Oasis";
 import { AssetConfig } from "../types";
 import { compressedTextureLoadOrder } from "../utils";
@@ -24,7 +24,7 @@ export class TextureResource extends SchemaResource {
       url = url ?? assetConfig.url;
 
       resourceManager
-        .load(url)
+        .load({ url, type: AssetType.Texture2D })
         .then((res) => {
           this._resource = res;
           resolve(this);

@@ -1,5 +1,5 @@
 import { MathUtil, Matrix, Vector2, Vector3, Vector4, Ray } from "@oasis-engine/math";
-import { ClearMode } from "./base";
+import { ClearMode, MaskList } from "./base";
 import { deepClone, ignoreClone } from "./clone/CloneManager";
 import { Component } from "./Component";
 import { dependencies } from "./ComponentsDependencies";
@@ -43,8 +43,11 @@ export enum ClearFlags {
 export class Camera extends Component {
   /** 渲染优先级，数字越大越先渲染。*/
   priority: number = 0;
-  /** 渲染遮罩，位操作。@todo 渲染管线剔除管理实现 */
-  cullingMask: number = 0;
+  /**
+   * 渲染遮罩。
+   * @remarks 位操作，对应 RenderableComponent 的 layer。
+   */
+  cullingMask: MaskList = MaskList.EVERYTHING;
 
   private _isOrthographic: boolean = false;
   private _isProjMatSetting = false;
@@ -373,10 +376,9 @@ export class Camera extends Component {
    * @returns 射线
    */
   screenToViewportPoint<T extends Vector2 | Vector3>(point: Vector3 | Vector2, out: T): T {
-    const canvas = this.engine.canvas;
     const viewport = this.viewport;
-    out.x = (point.x / canvas.width - viewport.x) / viewport.z;
-    out.y = (point.y / canvas.height - viewport.y) / viewport.w;
+    out.x = (point.x - viewport.x) / viewport.z;
+    out.y = (point.y - viewport.y) / viewport.w;
     return out;
   }
 

@@ -1,4 +1,5 @@
 import { BoundingBox, Vector3 } from "@oasis-engine/math";
+import { MaskList } from "./base";
 import { Camera } from "./Camera";
 import { deepClone, ignoreClone } from "./clone/CloneManager";
 import { Component } from "./Component";
@@ -9,6 +10,8 @@ import { UpdateFlag } from "./UpdateFlag";
  * 可渲染的组件。
  */
 export abstract class RenderableComponent extends Component {
+  /** 组件所属层级。 */
+  layer: MaskList = MaskList.EVERYTHING;
   /** @internal */
   @ignoreClone
   _onUpdateIndex: number = -1;
