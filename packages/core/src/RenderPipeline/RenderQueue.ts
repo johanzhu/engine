@@ -139,13 +139,14 @@ export class RenderQueue {
     this.updateMaxJointsNum(this._items, replaceMaterial);
 
     const context = RenderContext._getRenderContext(camera);
+    const { cullingMask } = camera;
 
     for (let i = 0, len = items.length; i < len; i++) {
       const item = items[i];
       const { component } = item;
 
       //-- filter by camera culling mask
-      if (!(camera.cullingMask & component.layer)) continue;
+      if (!(cullingMask & component._entity.layer)) continue;
 
       const renderPassFlag = component.renderPassFlag;
 

@@ -5,6 +5,7 @@ import { Component } from "./Component";
 import { ComponentsDependencies } from "./ComponentsDependencies";
 import { DisorderedArray } from "./DisorderedArray";
 import { Engine } from "./Engine";
+import { Layer } from "./Layer";
 import { Scene } from "./Scene";
 import { Transform } from "./Transform";
 import { UpdateFlag } from "./UpdateFlag";
@@ -81,6 +82,8 @@ export class Entity extends EventDispatcher {
 
   /* 名字。*/
   name: string;
+  /** 实体所属层级。 */
+  layer: Layer = Layer.Layer0;
   /* 变换。*/
   readonly transform: Transform;
 

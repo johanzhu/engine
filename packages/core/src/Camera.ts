@@ -4,6 +4,7 @@ import { deepClone, ignoreClone } from "./clone/CloneManager";
 import { Component } from "./Component";
 import { dependencies } from "./ComponentsDependencies";
 import { Entity } from "./Entity";
+import { Layer } from "./Layer";
 import { BasicRenderPipeline } from "./RenderPipeline/BasicRenderPipeline";
 import { TextureCubeFace } from "./texture/enums/TextureCubeFace";
 import { RenderTarget } from "./texture/RenderTarget";
@@ -47,7 +48,7 @@ export class Camera extends Component {
    * 渲染遮罩。
    * @remarks 位操作，对应 RenderableComponent 的 layer。
    */
-  cullingMask: MaskList = MaskList.EVERYTHING;
+  cullingMask: Layer = Layer.Everything;
 
   private _isOrthographic: boolean = false;
   private _isProjMatSetting = false;

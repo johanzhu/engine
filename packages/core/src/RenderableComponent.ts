@@ -10,8 +10,6 @@ import { UpdateFlag } from "./UpdateFlag";
  * 可渲染的组件。
  */
 export abstract class RenderableComponent extends Component {
-  /** 组件所属层级。 */
-  layer: MaskList = MaskList.EVERYTHING;
   /** @internal */
   @ignoreClone
   _onUpdateIndex: number = -1;
