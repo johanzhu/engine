@@ -137,7 +137,7 @@ export class Camera extends Component {
   }
 
   /**
-   * 视口，归一化表达，左上角为（0，0）坐标，右下角为（1，1）。
+   * 视口，归一化表达，左上角为（0，0），右下角为（1，1）。
    * @remarks 修改后需要重新赋值,保证修改生效。
    */
   get viewport(): Vector4 {
