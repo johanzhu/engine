@@ -1,5 +1,4 @@
 import { BoundingBox, Vector3 } from "@oasis-engine/math";
-import { MaskList } from "./base";
 import { Camera } from "./Camera";
 import { deepClone, ignoreClone } from "./clone/CloneManager";
 import { Component } from "./Component";

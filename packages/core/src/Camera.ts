@@ -46,7 +46,7 @@ export class Camera extends Component {
   priority: number = 0;
   /**
    * 渲染遮罩。
-   * @remarks 位操作，对应 RenderableComponent 的 layer。
+   * @remarks 位操作，对应 Entity 的 layer。
    */
   cullingMask: Layer = Layer.Everything;
 
