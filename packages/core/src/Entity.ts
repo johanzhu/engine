@@ -34,24 +34,13 @@ export class Entity extends EventDispatcher {
 
   /**
    * 根据路径全局查找实体，使用‘/’符号作为路径分割符。
+   * @deprecated use scene find by path instead.
    * @param scene - 查找场景
    * @param path - 路径
    * @returns 实体
    */
   static findByPath(scene: Scene, path: string): Entity | null {
-    if (scene) {
-      const splits = path.split("/").filter(Boolean);
-      for (let i = 0, n = scene.rootEntitiesCount; i < n; i++) {
-        let findEntity = scene.getRootEntity(i);
-        if (findEntity.name != splits[0]) continue;
-        for (let j = 1, m = splits.length; j < m; ++j) {
-          findEntity = Entity._findChildByName(findEntity, splits[j]);
-          if (!findEntity) break;
-        }
-        return findEntity;
-      }
-    }
-    return null;
+    return scene.findEntityByPath(path);
   }
 
   /**
