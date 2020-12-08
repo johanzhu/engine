@@ -22,6 +22,10 @@ class Texture2DLoader extends Loader<Texture2D> {
           texture.setImageSource(image);
           texture.generateMipmaps();
 
+          if (item.url.indexOf("data:") !== 0) {
+            const splitPath = item.url.split("/");
+            texture.name = splitPath[splitPath.length - 1];
+          }
           resolve(texture);
         })
         .catch((e) => {
