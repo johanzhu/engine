@@ -258,7 +258,7 @@ export class Entity extends EventDispatcher {
    */
   getComponentsIncludeChildren<T extends Component>(type: new (entity: Entity) => T, results: T[]): T[] {
     results.length = 0;
-    this._getComponentsInChildren<T>(type, results);
+    this._getComponentsIncludeChildren<T>(type, results);
     return results;
   }
 
@@ -449,7 +449,7 @@ export class Entity extends EventDispatcher {
     this._setActiveComponents(false);
   }
 
-  private _getComponentsInChildren<T extends Component>(type: new (entity: Entity) => T, results: T[]): void {
+  private _getComponentsIncludeChildren<T extends Component>(type: new (entity: Entity) => T, results: T[]): void {
     for (let i = this._components.length - 1; i >= 0; i--) {
       const component = this._components[i];
       if (component instanceof type) {
@@ -457,7 +457,7 @@ export class Entity extends EventDispatcher {
       }
     }
     for (let i = this._children.length - 1; i >= 0; i--) {
-      this._children[i]._getComponentsInChildren<T>(type, results);
+      this._children[i]._getComponentsIncludeChildren<T>(type, results);
     }
   }
 
