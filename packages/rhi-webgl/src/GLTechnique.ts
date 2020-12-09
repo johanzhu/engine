@@ -64,7 +64,7 @@ export class GLTechnique extends GLAsset {
    */
   finalize(forceDispose?: boolean) {
     if (this._program && forceDispose) {
-      this._program.finalize();
+      // this._program.finalize();
       this._program = null;
     }
   }
@@ -205,9 +205,11 @@ export class GLTechnique extends GLAsset {
         gl.uniform3fv(location, value);
         break;
       case DataType.FLOAT_VEC4:
+        if ((<any>this).xxxx) debugger;
         gl.uniform4f(location, value.x, value.y, value.z, value.w);
         break;
       case DataType.FLOAT_VEC4_ARRAY:
+        if ((<any>this).xxxx) debugger;
         gl.uniform4fv(location, value);
         break;
       case DataType.INT_VEC2:
@@ -274,6 +276,7 @@ export class GLTechnique extends GLAsset {
    */
   _uploadTexture(texture, location) {
     if (texture) {
+      if ((<any>this).xxxx) debugger;
       const gl = this.rhi.gl;
       const index = this._activeTextureCount++;
       gl.activeTexture(gl.TEXTURE0 + index);
