@@ -222,7 +222,7 @@ export class Entity extends EventDispatcher {
   /**
    * 根据组件类型获取组件。
    * @param type - 组件类型
-   * @returns	组件实例
+   * @returns	组件
    */
   getComponent<T extends Component>(type: new (entity: Entity) => T): T {
     for (let i = this._components.length - 1; i >= 0; i--) {
@@ -236,10 +236,10 @@ export class Entity extends EventDispatcher {
   /**
    * 根据组件类型获取组件集合。
    * @param type - 组件类型
-   * @param results - 组件实例集合
-   * @returns	组件实例集合
+   * @param results - 组件集合
+   * @returns	组件集合
    */
-  getComponents<T extends Component>(type: new (entity: Entity) => T, results: Array<T>): Array<T> {
+  getComponents<T extends Component>(type: new (entity: Entity) => T, results: T[]): T[] {
     results.length = 0;
     for (let i = this._components.length - 1; i >= 0; i--) {
       const component = this._components[i];
@@ -247,6 +247,18 @@ export class Entity extends EventDispatcher {
         results.push(component);
       }
     }
+    return results;
+  }
+
+  /**
+   * 根据组件类型获取自身和所有子实体的组件集合。
+   * @param type - 组件类型
+   * @param results - 组件集合
+   * @returns	组件集合
+   */
+  getComponentsIncludeChildren<T extends Component>(type: new (entity: Entity) => T, results: T[]): T[] {
+    results.length = 0;
+    this._getComponentsInChildren<T>(type, results);
     return results;
   }
 
@@ -435,6 +447,18 @@ export class Entity extends EventDispatcher {
     this._activeChangedComponents = this._engine._componentsManager.getActiveChangedTempList();
     this._setInActiveInHierarchy(this._activeChangedComponents);
     this._setActiveComponents(false);
+  }
+
+  private _getComponentsInChildren<T extends Component>(type: new (entity: Entity) => T, results: T[]): void {
+    for (let i = this._components.length - 1; i >= 0; i--) {
+      const component = this._components[i];
+      if (component instanceof type) {
+        results.push(component);
+      }
+    }
+    for (let i = this._children.length - 1; i >= 0; i--) {
+      this._children[i]._getComponentsInChildren<T>(type, results);
+    }
   }
 
   private _setActiveComponents(isActive: boolean): void {
