@@ -64,7 +64,7 @@ export class GLTechnique extends GLAsset {
    */
   finalize(forceDispose?: boolean) {
     if (this._program && forceDispose) {
-      this._program.finalize();
+      // this._program.finalize();
       this._program = null;
     }
   }

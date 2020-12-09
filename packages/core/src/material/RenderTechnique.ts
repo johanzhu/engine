@@ -12,6 +12,8 @@ import { Attributes, TechniqueStates, Uniforms } from "./type";
  */
 export class RenderTechnique extends AssetObject {
   // 是否可用
+  public _glTechnique: any;
+  // 是否可用
   public isValid: boolean = false;
   // Unifrom记录数组
   private _uniforms: Uniforms = RenderTechnique.commonUniforms;
@@ -416,4 +418,11 @@ export class RenderTechnique extends AssetObject {
       type: DataType.FLOAT
     }
   };
+
+  _finalize(): void {
+    if (this._glTechnique) {
+      this._glTechnique.finalize(true);
+      this._glTechnique = null;
+    }
+  }
 }
