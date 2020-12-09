@@ -2,11 +2,12 @@ import { Vector3 } from "@oasis-engine/math";
 import { MaskList } from "../base";
 import { Camera } from "../Camera";
 import { Component } from "../Component";
+import { RenderableComponent } from "../RenderableComponent";
 import { RenderContext } from "./RenderContext";
 import { RenderElement } from "./RenderElement";
 
 interface SpriteElement {
-  component;
+  component: RenderableComponent;
   positionQuad;
   uvRect;
   tintColor;
@@ -108,6 +109,7 @@ export class RenderQueue {
    */
   pushSprite(component: Component, positionQuad, uvRect, tintColor, texture, renderMode, camera: Camera) {
     const element: SpriteElement = {
+      // @ts-ignore
       component,
       positionQuad,
       uvRect,
@@ -137,13 +139,18 @@ export class RenderQueue {
     this.updateMaxJointsNum(this._items, replaceMaterial);
 
     const context = RenderContext._getRenderContext(camera);
+    const { cullingMask } = camera;
 
     for (let i = 0, len = items.length; i < len; i++) {
       const item = items[i];
       const { component } = item;
 
-      //-- filter by mask
+      //-- filter by camera culling mask
+      if (!(cullingMask & component._entity.layer)) continue;
+
       const renderPassFlag = component.renderPassFlag;
+
+      //-- filter by mask
       if (!(renderPassFlag & mask)) continue;
 
       //-- draw
