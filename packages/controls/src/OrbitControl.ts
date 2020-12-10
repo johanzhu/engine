@@ -538,9 +538,9 @@ export class OrbitControl extends Script {
     this._zoomEnd.setValue(event.clientX, event.clientY);
     Vector2.subtract(this._zoomEnd, this._zoomStart, this._zoomDelta);
 
-    if (this._zoomDelta[1] > 0) {
+    if (this._zoomDelta.y > 0) {
       this.zoomOut(this.getZoomScale());
-    } else if (this._zoomDelta[1] < 0) {
+    } else if (this._zoomDelta.y < 0) {
       this.zoomIn(this.getZoomScale());
     }
 
@@ -652,9 +652,9 @@ export class OrbitControl extends Script {
 
     Vector2.subtract(this._zoomEnd, this._zoomStart, this._zoomDelta);
 
-    if (this._zoomDelta[1] > 0) {
+    if (this._zoomDelta.y > 0) {
       this.zoomIn(this.getZoomScale());
-    } else if (this._zoomDelta[1] < 0) {
+    } else if (this._zoomDelta.y < 0) {
       this.zoomOut(this.getZoomScale());
     }
 
