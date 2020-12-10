@@ -1,5 +1,5 @@
 import { Collider } from "./Collider";
-import { Vector3 } from "@oasis-engine/math";
+import { Ray, RaycastHit, Vector3 } from "@oasis-engine/math";
 import { Entity } from "../Entity";
 /**
  * 球型碰撞体组件
@@ -28,6 +28,13 @@ export class ASphereCollider extends Collider {
      */
     this.radius = 1;
   }
+
+  /**
+   * 射线检测
+   * @param ray - 射线
+   * @param hit - 碰撞信息
+   */
+  raycast(ray: Ray, hit: RaycastHit) {}
 
   /**
    * 设置球体的属性数据
