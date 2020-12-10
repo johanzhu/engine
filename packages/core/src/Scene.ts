@@ -135,7 +135,7 @@ export class Scene extends EventDispatcher {
 
   /**
    * 根据名字全局查找实体。
-   * @param name 节点名称
+   * @param name 实体名称
    * @returns 实体
    */
   findEntityByName(name: string): Entity | null {
@@ -159,11 +159,11 @@ export class Scene extends EventDispatcher {
 
   /**
    * 根据路径全局查找实体，使用‘/’符号作为路径分割符。
-   * @param entityPath - 实体路径
+   * @param path - 实体路径
    * @returns 实体
    */
-  findEntityByPath(entityPath: string): Entity | null {
-    const splits = entityPath.split("/").filter(Boolean);
+  findEntityByPath(path: string): Entity | null {
+    const splits = path.split("/").filter(Boolean);
     for (let i = 0, n = this.rootEntitiesCount; i < n; i++) {
       let findEntity = this.getRootEntity(i);
       if (findEntity.name != splits[0]) continue;
