@@ -135,7 +135,7 @@ export class Scene extends EventDispatcher {
 
   /**
    * 根据名字全局查找实体。
-   * @param name 实体名称
+   * @param name - 实体名称
    * @returns 实体
    */
   findEntityByName(name: string): Entity | null {
