@@ -343,15 +343,17 @@ export class Material extends RefObject {
    */
   _onDestroy() {
     // TODO: 待材质重构
-    const values = ObjectValues(this._values);
-    for (let i = 0, len = values.length; i < len; i++) {
-      const value = values[i];
-      if (value instanceof Texture) {
-        value._addRefCount(-1);
+    if (this._technique) {
+      const values = ObjectValues(this._values);
+      for (let i = 0, len = values.length; i < len; i++) {
+        const value = values[i];
+        if (value instanceof Texture) {
+          value._addRefCount(-1);
+        }
       }
-    }
 
-    this._technique._finalize();
-    this._technique = null;
+      this._technique._finalize();
+      this._technique = null;
+    }
   }
 }
