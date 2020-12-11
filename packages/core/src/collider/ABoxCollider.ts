@@ -81,26 +81,5 @@ export class ABoxCollider extends Collider {
     }
 
     return this._corners;
-    // if (this._corners.length === 0) {
-    //   const minX = this.boxMin.x;
-    //   const minY = this.boxMin.y;
-    //   const minZ = this.boxMin.z;
-    //   const w = this.boxMax.x - minX;
-    //   const h = this.boxMax.y - minY;
-    //   const d = this.boxMax.z - minZ;
-
-    //   this._corners = [
-    //     new Vector3(minX + w, minY + h, minZ + d),
-    //     new Vector3(minX, minY + h, minZ + d),
-    //     new Vector3(minX, minY, minZ + d),
-    //     new Vector3(minX + w, minY, minZ + d),
-    //     new Vector3(minX + w, minY + h, minZ),
-    //     new Vector3(minX, minY + h, minZ),
-    //     new Vector3(minX, minY, minZ),
-    //     new Vector3(minX + w, minY, minZ)
-    //   ];
-    // }
-
-    // return this._corners;
   }
 }
