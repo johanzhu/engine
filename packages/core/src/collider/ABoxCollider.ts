@@ -2,15 +2,6 @@ import { Vector3 } from "@oasis-engine/math";
 import { Entity } from "../Entity";
 import { Collider } from "./Collider";
 
-const _tempVec30 = new Vector3();
-const _tempVec31 = new Vector3();
-const _tempVec32 = new Vector3();
-const _tempVec33 = new Vector3();
-const _tempVec34 = new Vector3();
-const _tempVec35 = new Vector3();
-const _tempVec36 = new Vector3();
-const _tempVec37 = new Vector3();
-
 /**
  * 轴对齐的包围盒（AABBox）碰撞体组件
  * @extends Collider
@@ -21,6 +12,7 @@ export class ABoxCollider extends Collider {
   public boxMin: Vector3;
   public boxMax: Vector3;
   private _corners: Array<Vector3> = [];
+  private _cornerFlag: boolean = false;
 
   /**
    * 构造函数
@@ -39,9 +31,9 @@ export class ABoxCollider extends Collider {
    */
   setBoxMinMax(min: Vector3, max: Vector3) {
     this.boxMin = min;
-    this.boxMin = max;
+    this.boxMax = max;
 
-    this._corners.length = 0;
+    this._cornerFlag = true;
   }
 
   /**
@@ -55,14 +47,14 @@ export class ABoxCollider extends Collider {
     Vector3.add(center, halfSize, this.boxMax);
     Vector3.subtract(center, halfSize, this.boxMin);
 
-    this._corners.length = 0;
+    this._cornerFlag = true;
   }
 
   /**
    * 取得八个顶点的位置
    */
   getCorners(): Vector3[] {
-    if (this._corners.length === 0) {
+    if (this._cornerFlag) {
       const minX = this.boxMin.x;
       const minY = this.boxMin.y;
       const minZ = this.boxMin.z;
@@ -70,17 +62,22 @@ export class ABoxCollider extends Collider {
       const h = this.boxMax.y - minY;
       const d = this.boxMax.z - minZ;
 
-      // follow the same order as the old
-      _tempVec30.setValue(minX + w, minY + h, minZ + d);
-      _tempVec31.setValue(minX, minY + h, minZ + d);
-      _tempVec32.setValue(minX, minY, minZ + d);
-      _tempVec33.setValue(minX + w, minY, minZ + d);
-      _tempVec34.setValue(minX + w, minY + h, minZ);
-      _tempVec35.setValue(minX, minY + h, minZ);
-      _tempVec36.setValue(minX, minY, minZ);
-      _tempVec37.setValue(minX + w, minY, minZ);
+      if (this._corners.length === 0) {
+        for (let i = 0; i < 8; ++i) {
+          this._corners.push(new Vector3());
+        }
+      }
 
-      this._corners = [_tempVec30, _tempVec31, _tempVec32, _tempVec33, _tempVec34, _tempVec35, _tempVec36, _tempVec37];
+      this._corners[0].setValue(minX + w, minY + h, minZ + d);
+      this._corners[1].setValue(minX, minY + h, minZ + d);
+      this._corners[2].setValue(minX, minY, minZ + d);
+      this._corners[3].setValue(minX + w, minY, minZ + d);
+      this._corners[4].setValue(minX + w, minY + h, minZ);
+      this._corners[5].setValue(minX, minY + h, minZ);
+      this._corners[6].setValue(minX, minY, minZ);
+      this._corners[7].setValue(minX + w, minY, minZ);
+
+      this._cornerFlag = false;
     }
 
     return this._corners;
