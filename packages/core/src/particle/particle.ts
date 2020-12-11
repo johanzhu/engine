@@ -206,6 +206,7 @@ export class GPUParticleSystem extends GeometryRenderer {
     material.renderType = MaterialType.TRANSPARENT;
 
     material.setValue("uOnce", this.once ? 1.0 : 0.0);
+    material.setValue("uTime", this._time);
 
     if (this.particleTex) {
       this.particleTex.wrapModeU = this.particleTex.wrapModeV = TextureWrapMode.Clamp;
