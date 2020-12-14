@@ -51,7 +51,7 @@ function config({location, pkgJson}) {
       let file = path.join(location, "dist", "browser.js");
       const plugins = [...commonPlugins];
       if (compress) {
-        // plugins.push(terser());
+        plugins.push(terser());
         file = path.join(location, "dist", "browser.min.js");
       }
       if (visualizer) plugins.push(visualizerFunc());
