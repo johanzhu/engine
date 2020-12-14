@@ -9,6 +9,7 @@ import { WebGLRenderer } from "./WebGLRenderer";
  * @private
  */
 export class GLTechnique extends GLAsset {
+  static cacheCounter: number = 0;
   readonly valid: boolean;
 
   private _tech: RenderTechnique;
@@ -20,6 +21,7 @@ export class GLTechnique extends GLAsset {
 
   constructor(rhi: WebGLRenderer, tech: RenderTechnique) {
     super(rhi, tech);
+    this.cacheID = ++GLTechnique.cacheCounter;
     this._tech = tech;
     this._activeTextureCount = 0;
 
