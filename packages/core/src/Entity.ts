@@ -325,6 +325,7 @@ export class Entity extends EventDispatcher {
    */
   createChild(name?: string): Entity {
     const child = new Entity(this.engine, name);
+    child.layer = this.layer;
     child.parent = this;
     return child;
   }
