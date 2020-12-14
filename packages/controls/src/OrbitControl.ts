@@ -79,10 +79,6 @@ export class OrbitControl extends Script {
     this.domElement = document;
     this.fov = 45;
 
-    if (!(this.mainElement instanceof HTMLCanvasElement)) {
-      Logger.warn("OrbitControls must have a legal mainElement");
-      return null;
-    }
     // 目标点
     this.target = new Vector3();
 

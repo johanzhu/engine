@@ -97,10 +97,6 @@ export class FreeControl extends Script {
     this.mainElement = this.scene.engine.canvas._webCanvas;
     this.domElement = document;
 
-    if (!(this.mainElement instanceof HTMLCanvasElement)) {
-      Logger.warn("AFreeControls must have a legal mainElement");
-      return null;
-    }
     this.movementSpeed = 1.0;
     this.rotateSpeed = 1.0;
 
