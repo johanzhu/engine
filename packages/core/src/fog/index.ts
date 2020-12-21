@@ -8,4 +8,4 @@ Scene.registerFeature(FogFeature);
 
 export { EXP2Fog } from "./EXP2Fog";
 export { LinearFog } from "./LinearFog";
-export { FogFeature };
+export { bindFogToMaterial, FogFeature, getFogMacro, hasFogFeature };
