@@ -43,9 +43,9 @@
     #if defined(ALPHA_BLEND) && defined(HAS_OPACITYMAP)
 
         #ifdef GETOPACITYFROMRGB
-            diffuseColor.a *= getLuminance(texture2D( u_opacitySampler, v_opacityTexture ).rgb);
+            diffuseColor.a *= getLuminance(texture2D( u_opacitySampler, v_uv ).rgb);
         #else
-            diffuseColor.a *= texture2D( u_opacitySampler, v_opacityTexture ).a;
+            diffuseColor.a *= texture2D( u_opacitySampler, v_uv ).a;
         #endif
 
     #endif

@@ -355,11 +355,11 @@ class PBRMaterial extends Material {
   }
 
   get opacity(): number {
-    return this.baseColorFactor[3];
+    return this.baseColorFactor.w;
   }
 
   set opacity(val: number) {
-    this.baseColorFactor[3] = val;
+    this.baseColorFactor.w = val;
   }
 
   /**
