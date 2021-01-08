@@ -37,7 +37,7 @@ export class Engine extends EventDispatcher {
       this._requestId = requestAnimationFrame(this._animate);
       if (this._loopCounter++ % this._vSyncCount === 0) {
         this.update();
-        this._loopCounter = 0;
+        this._loopCounter = 1;
       }
     } else {
       this._timeoutId = window.setTimeout(this._animate, this._targetFrameInterval);
