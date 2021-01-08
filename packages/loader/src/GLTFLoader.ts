@@ -5,7 +5,8 @@ import {
   AssetType,
   LoadItem,
   ResourceManager,
-  Texture2D
+  Texture2D,
+  GLCapabilityType
 } from "@oasis-engine/core";
 import { GlTf, LoadedGLTFResource } from "./GLTF";
 import { parseGLTF, GLTFResource } from "./gltf/glTF";
@@ -92,29 +93,58 @@ export class GLTFLoader extends Loader<GLTFResource> {
     buffers,
     baseUrl,
     resourceManager
-  }: LoadedGLTFResource & { baseUrl: string; resourceManager: ResourceManager }): Promise<any> => {
-    if (gltf.images) {
-      return Promise.all(
-        gltf.images.map(({ uri, bufferView: bufferViewIndex, mimeType }) => {
-          if (uri) {
-            // 使用 base64 或 url
-            return resourceManager.load({ url: parseRelativeUrl(baseUrl, uri), type: AssetType.Texture2D });
-          } else {
-            // 使用 bufferView
-            const bufferView = gltf.bufferViews[bufferViewIndex];
-            const bufferData = getBufferData(bufferView, buffers);
-            return loadImageBuffer(bufferData, mimeType).then((image) => {
-              const tex = new Texture2D(resourceManager.engine, image.width, image.height);
-              tex.setImageSource(image);
-              tex.generateMipmaps();
-              return tex;
-            });
-          }
-        })
-      ).then((textures) => {
-        return { gltf, buffers, textures };
-      });
+  }: LoadedGLTFResource & { baseUrl: string; resourceManager: ResourceManager }) => {
+    if (!gltf.images) {
+      return Promise.resolve({ gltf, buffers });
     }
-    return Promise.resolve({ gltf, buffers });
+    let texturePromises = undefined;
+    const rhi = resourceManager.engine._hardwareRenderer;
+    if (gltf.astc && rhi.canIUse(GLCapabilityType.pvrtc)) {
+      texturePromises = this._loadCompressedTexture(resourceManager, gltf.pvrtc, baseUrl);
+    } else if (gltf.pvrtc && rhi.canIUse(GLCapabilityType.astc)) {
+      texturePromises = this._loadCompressedTexture(resourceManager, gltf.astc, baseUrl);
+    } else if (gltf.etc && rhi.canIUse(GLCapabilityType.etc)) {
+      texturePromises = this._loadCompressedTexture(resourceManager, gltf.etc, baseUrl);
+    } else {
+      texturePromises = this._loadBasicImages(resourceManager, gltf.images, baseUrl, buffers, gltf);
+    }
+    return texturePromises.then((textures) => {
+      return { gltf, buffers, textures };
+    });
+  };
+
+  private _loadBasicImages = (
+    resourceManager: ResourceManager,
+    images: any,
+    baseUrl: string,
+    buffers: any,
+    gltf: any
+  ) => {
+    return Promise.all(
+      images.map(({ uri, bufferView: bufferViewIndex, mimeType }) => {
+        if (uri) {
+          // 使用 base64 或 url
+          return resourceManager.load({ url: parseRelativeUrl(baseUrl, uri), type: AssetType.Texture2D });
+        } else {
+          // 使用 bufferView
+          const bufferView = gltf.bufferViews[bufferViewIndex];
+          const bufferData = getBufferData(bufferView, buffers);
+          return loadImageBuffer(bufferData, mimeType).then((image) => {
+            const tex = new Texture2D(resourceManager.engine, image.width, image.height);
+            tex.setImageSource(image);
+            tex.generateMipmaps();
+            return tex;
+          });
+        }
+      })
+    );
+  };
+
+  private _loadCompressedTexture = (resourceManager: ResourceManager, images: any, baseUrl: string) => {
+    const promises = images.map((item: any) => {
+      return resourceManager.load({ url: parseRelativeUrl(baseUrl, item.uri), type: AssetType.KTX });
+    });
+
+    return Promise.all(promises);
   };
 }
