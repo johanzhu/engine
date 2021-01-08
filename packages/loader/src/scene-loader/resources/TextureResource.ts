@@ -1,7 +1,6 @@
 import { AssetType, GLCapabilityType, ResourceManager } from "@oasis-engine/core";
 import { Oasis } from "../Oasis";
 import { AssetConfig } from "../types";
-import { compressedTextureLoadOrder } from "../utils";
 import { SchemaResource } from "./SchemaResource";
 
 export class TextureResource extends SchemaResource {
@@ -12,7 +11,6 @@ export class TextureResource extends SchemaResource {
       if (this.resourceManager.useCompressedTexture && assetConfig?.props?.compression?.compressions.length) {
         const rhi = oasis.engine._hardwareRenderer;
         const compressions = assetConfig.props.compression.compressions;
-        compressions.sort((a: any, b: any) => compressedTextureLoadOrder[a.type] - compressedTextureLoadOrder[b.type]);
         for (let i = 0; i < compressions.length; i++) {
           const compression = compressions[i];
           if (compression.container === "ktx" && rhi.canIUse(GLCapabilityType[compression.type])) {
