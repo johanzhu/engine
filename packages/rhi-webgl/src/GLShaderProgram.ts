@@ -191,16 +191,14 @@ export class GLShaderProgram {
     }
 
     // debug开启才进行消耗性能的能力检测
-    if (Logger.isEnabled) {
-      if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS) && !gl.isContextLost()) {
-        const msg = `Could not compile WebGL shader.\n${addLineNum(shaderSource)}\n${gl.getShaderInfoLog(shader)}`;
-        console.error(msg);
-        this._engine.dispatch("compileShaderError", msg);
-        // Logger.error( gl.getShaderInfoLog( shader ) );
+    if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS) && !gl.isContextLost()) {
+      const msg = `Could not compile WebGL shader.\n${addLineNum(shaderSource)}\n${gl.getShaderInfoLog(shader)}`;
+      console.error(msg);
+      this._engine.dispatch("compileShaderError", msg);
+      // Logger.error( gl.getShaderInfoLog( shader ) );
 
-        gl.deleteShader(shader);
-        return null;
-      }
+      gl.deleteShader(shader);
+      return null;
     }
 
     return shader;
