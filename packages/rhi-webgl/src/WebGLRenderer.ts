@@ -19,6 +19,7 @@ import { GLSpriteBatcher } from "./GLSpriteBatcher";
 import { GLTechnique } from "./GLTechnique";
 import { WebGLExtension } from "./type";
 import { WebCanvas } from "./WebCanvas";
+import { WebGLEngine } from "./WebGLEngine";
 
 /**
  * WebGL模式。默认 Auto
@@ -44,6 +45,8 @@ export interface WebGLRendererOptions extends WebGLContextAttributes {
  * WebGL渲染器实现，包含了WebGL1.0/和WebGL2.0。
  */
 export class WebGLRenderer implements HardwareRenderer {
+  /** @internal */
+  _engine: WebGLEngine;
   private _options: WebGLRendererOptions;
   private _gl: (WebGLRenderingContext & WebGLExtension) | WebGL2RenderingContext;
   private _renderStates;
@@ -63,8 +66,9 @@ export class WebGLRenderer implements HardwareRenderer {
     this._options = options;
   }
 
-  init(canvas: Canvas) {
+  init(canvas: Canvas, engine: WebGLEngine) {
     const option = this._options;
+    this._engine = engine;
     const webCanvas = (canvas as WebCanvas)._webCanvas;
     const webGLMode = option.webGLMode || WebGLMode.Auto;
     let gl: (WebGLRenderingContext & WebGLExtension) | WebGL2RenderingContext;

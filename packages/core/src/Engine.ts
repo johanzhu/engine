@@ -121,7 +121,7 @@ export class Engine extends EventDispatcher {
   constructor(canvas: Canvas, hardwareRenderer: HardwareRenderer) {
     super(null);
     this._hardwareRenderer = hardwareRenderer;
-    this._hardwareRenderer.init(canvas);
+    this._hardwareRenderer.init(canvas, this);
     this._canvas = canvas;
     // @todo delete
     engineFeatureManager.addObject(this);
