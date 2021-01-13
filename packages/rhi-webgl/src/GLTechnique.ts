@@ -28,7 +28,7 @@ export class GLTechnique extends GLAsset {
     const gl: WebGLRenderingContext = rhi.gl;
 
     //-- 编译shader 或者从缓存中捞program
-    this._program = GLShaderProgram.requireProgram(tech, gl);
+    this._program = GLShaderProgram.requireProgram(tech, gl, rhi._engine);
     if (this._program) {
       this.valid = true;
       const glProgram = this._program.program;

@@ -1,5 +1,6 @@
 import { Logger } from "@oasis-engine/core";
 import { RenderTechnique } from "@oasis-engine/core";
+import { WebGLEngine } from "./WebGLEngine";
 
 interface UniformCache {
   [key: string]: WebGLUniformLocation | null;
@@ -39,7 +40,7 @@ export class GLShaderProgram {
    * @param {WebGLRenderingContext} gl
    * @return {GLShaderProgram}
    * */
-  static requireProgram(tech: RenderTechnique, gl: WebGLRenderingContext): GLShaderProgram {
+  static requireProgram(tech: RenderTechnique, gl: WebGLRenderingContext, engine: WebGLEngine): GLShaderProgram {
     let program: GLShaderProgram = null;
 
     programList.some((p) => {
@@ -54,7 +55,7 @@ export class GLShaderProgram {
     });
 
     if (!program) {
-      program = new GLShaderProgram(gl);
+      program = new GLShaderProgram(gl, engine);
       const sucess = program.createFromSource(tech.vertexShader, tech.fragmentShader, tech.attribLocSet);
       if (!sucess) return null;
       programList.push(program);
@@ -83,7 +84,7 @@ export class GLShaderProgram {
   private _attributeCache: AttributeCache;
   private _uniformCache: UniformCache;
 
-  constructor(gl: WebGLRenderingContext) {
+  constructor(gl: WebGLRenderingContext, private _engine: WebGLEngine) {
     this._gl = gl;
 
     // {WebGLShader}
@@ -154,7 +155,9 @@ export class GLShaderProgram {
     // debug开启才进行消耗性能的能力检测
     // if (Logger.isEnabled) {
     if (!gl.getProgramParameter(program, gl.LINK_STATUS) && !gl.isContextLost()) {
-      Logger.error("Could not link WebGL program. \n" + gl.getProgramInfoLog(program));
+      const msg = "Could not link WebGL program. \n" + gl.getProgramInfoLog(program);
+      console.error(msg);
+      this._engine.dispatch("linkProgramError", msg);
       gl.deleteProgram(program);
       return false;
       // }
@@ -190,7 +193,9 @@ export class GLShaderProgram {
     // debug开启才进行消耗性能的能力检测
     if (Logger.isEnabled) {
       if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS) && !gl.isContextLost()) {
-        Logger.error(`Could not compile WebGL shader.\n${addLineNum(shaderSource)}\n${gl.getShaderInfoLog(shader)}`);
+        const msg = `Could not compile WebGL shader.\n${addLineNum(shaderSource)}\n${gl.getShaderInfoLog(shader)}`;
+        console.error(msg);
+        this._engine.dispatch("compileShaderError", msg);
         // Logger.error( gl.getShaderInfoLog( shader ) );
 
         gl.deleteShader(shader);
