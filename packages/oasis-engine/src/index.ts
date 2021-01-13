@@ -37,3 +37,8 @@ Parser.registerComponents("o3", {
   PlaneProbe,
   Model
 });
+
+//@ts-ignore
+export const version = `__buildVersion`;
+
+console.log(`oasis engine version: ${version}`);

@@ -8,7 +8,9 @@ import string from "@ali/rollup-plugin-string";
 import { terser } from "rollup-plugin-terser";
 import miniProgramPlugin from "./rollup.miniprogram.plugin";
 import visualizerFunc from "rollup-plugin-visualizer";
-import esbuild from 'rollup-plugin-esbuild';
+import esbuild from "rollup-plugin-esbuild";
+import replace from "@rollup/plugin-replace";
+
 const camelCase = require("camelcase");
 
 const { NODE_ENV } = process.env;
@@ -45,6 +47,11 @@ function config({location, pkgJson}) {
   const input = path.join(location, "src", "index.ts");
   const external = Object.keys(pkgJson.dependencies || {});
   const name = pkgJson.name;
+  commonPlugins.push(
+    replace({
+      __buildVersion: pkgJson.version
+    })
+  );
 
   return {
     umd: (compress, visualizer) => {
