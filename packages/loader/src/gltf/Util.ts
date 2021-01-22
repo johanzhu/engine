@@ -187,7 +187,10 @@ export function loadImageBuffer(imageBuffer: ArrayBuffer, type: string): Promise
       reject(new Error("Failed to load image buffer"));
     };
     img.onload = function () {
-      resolve(img);
+      // Call requestAnimationFrame to avoid iOS's bug.
+      requestAnimationFrame(() => {
+        resolve(img);
+      });
     };
   });
 }

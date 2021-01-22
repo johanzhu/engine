@@ -72,8 +72,11 @@ function requestImage<T>(url: string, config: RequestConfig): AssetPromise<T> {
 
     img.onload = ((timeoutId) => {
       return () => {
-        //@ts-ignore
-        resolve(img);
+        // Call requestAnimationFrame to avoid iOS's bug.
+        requestAnimationFrame(() => {
+          //@ts-ignore
+          resolve(img);
+        });
         clearTimeout(timeoutId);
       };
     })(timeoutId);
