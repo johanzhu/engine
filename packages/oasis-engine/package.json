@@ -1,6 +1,6 @@
 {
   "name": "oasis-engine",
-  "version": "0.1.29",
+  "version": "0.1.30",
   "scripts": {
     "b:types": "tsc"
   },
@@ -13,9 +13,9 @@
     "types/**/*"
   ],
   "dependencies": {
-    "@oasis-engine/core": "0.1.29",
-    "@oasis-engine/loader": "0.1.29",
-    "@oasis-engine/math": "0.1.29",
-    "@oasis-engine/rhi-webgl": "0.1.29"
+    "@oasis-engine/core": "0.1.30",
+    "@oasis-engine/loader": "0.1.30",
+    "@oasis-engine/math": "0.1.30",
+    "@oasis-engine/rhi-webgl": "0.1.30"
   }
 }
