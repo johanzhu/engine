@@ -21,7 +21,6 @@ import { RenderElement } from "./RenderPipeline/RenderElement";
 import { SubRenderElement } from "./RenderPipeline/SubRenderElement";
 import { Scene } from "./Scene";
 import { SceneManager } from "./SceneManager";
-import { ContentRestorer } from "./asset/ContentRestorer";
 import { ResourceManager } from "./asset/ResourceManager";
 import { EventDispatcher, Logger, Time } from "./base";
 import { GLCapabilityType } from "./base/Constant";
@@ -106,16 +105,6 @@ export class Engine extends EventDispatcher {
   /* @internal */
   _renderContext: RenderContext = new RenderContext();
 
-  /* @internal */
-  _whiteTexture2D: Texture2D;
-  /* @internal */
-  _magentaTexture2D: Texture2D;
-  /* @internal */
-  _uintMagentaTexture2D: Texture2D;
-  /* @internal */
-  _magentaTextureCube: TextureCube;
-  /* @internal */
-  _magentaTexture2DArray: Texture2DArray;
   /* @internal */
   _meshMagentaMaterial: Material;
   /* @internal */
@@ -275,8 +264,6 @@ export class Engine extends EventDispatcher {
       this.xrManager = new XRManager();
       this.xrManager._initialize(this, xrDevice);
     }
-
-    this._initMagentaTextures(hardwareRenderer);
 
     if (!hardwareRenderer.canIUse(GLCapabilityType.depthTexture)) {
       this._macroCollection.enable(Engine._noDepthTextureMacro);
