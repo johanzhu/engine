@@ -1,6 +1,6 @@
 import { Matrix, Plane, Ray, Vector3, Vector4 } from "@galacean/engine-math";
 import { DependentMode, dependentComponents } from "../ComponentsDependencies";
-import { Entity } from "../Entity";
+import { Entity, EntityModifyFlags } from "../Entity";
 import { PrimitiveChunkManager } from "../RenderPipeline/PrimitiveChunkManager";
 import { RenderContext } from "../RenderPipeline/RenderContext";
 import { SubPrimitiveChunk } from "../RenderPipeline/SubPrimitiveChunk";
@@ -41,6 +41,9 @@ export class UIRenderer extends Renderer {
   protected _rayCastAble: boolean = true;
   protected _rayCastPadding: Vector4 = new Vector4(0, 0, 0, 0);
 
+  private _uiCanvas: UICanvas[] = [];
+  private _canvasGroup: CanvasGroup[] = [];
+
   get rayCastAble(): boolean {
     return this._rayCastAble;
   }
@@ -65,6 +68,8 @@ export class UIRenderer extends Renderer {
   constructor(entity: Entity) {
     super(entity);
     this._componentType = ComponentType.UIRenderer;
+    this._onEntityModify = this._onEntityModify.bind(this);
+    this._findUICanvasAndCanvasGroup();
   }
 
   /**
@@ -105,6 +110,8 @@ export class UIRenderer extends Renderer {
    */
   override _onEnableInScene(): void {
     const componentsManager = this.scene._componentsManager;
+    this._findUICanvasAndCanvasGroup();
+    this._entity._registerModifyListener(this._onEntityModify);
     if (this._overrideUpdate) {
       componentsManager.addOnUpdateRenderers(this);
     }
@@ -115,6 +122,8 @@ export class UIRenderer extends Renderer {
    */
   override _onDisableInScene(): void {
     const componentsManager = this.scene._componentsManager;
+    this._clearUICanvasAndCanvasGroup();
+    this._entity._removeModifyListener(this._onEntityModify);
     if (this._overrideUpdate) {
       componentsManager.removeOnUpdateRenderers(this);
     }
@@ -179,10 +188,40 @@ export class UIRenderer extends Renderer {
       this._subChunk = null;
     }
 
+    this._clearUICanvasAndCanvasGroup();
+
     super._onDestroy();
   }
 
   protected override _onTransformChanged(flag: TransformModifyFlags): void {}
+
+  private _findUICanvasAndCanvasGroup() {
+    const { _uiCanvas, _canvasGroup, entity } = this;
+    _uiCanvas.length = 0;
+    _canvasGroup.length = 0;
+    entity.getComponentsInParent(UICanvas, _uiCanvas);
+    entity.getComponentsInParent(CanvasGroup, _canvasGroup);
+    _uiCanvas[0]?.addRenderer(this);
+    this._setGroup(_canvasGroup[0]);
+  }
+
+  private _clearUICanvasAndCanvasGroup() {
+    const { _uiCanvas, _canvasGroup } = this;
+    _uiCanvas[0]?.removeRenderer(this);
+    this._setGroup(null);
+    _uiCanvas.length = 0;
+    _canvasGroup.length = 0;
+  }
+
+  private _onEntityModify(flag: EntityModifyFlags): void {
+    switch (flag) {
+      case EntityModifyFlags.Parent:
+        this._findUICanvasAndCanvasGroup();
+        break;
+      default:
+        break;
+    }
+  }
 }
 
 /**

@@ -45,14 +45,6 @@ export class UICanvas extends Component {
   private _enableBlocked: boolean = true;
   private _parents: Entity[] = [];
 
-  /** @internal */
-  get renderers(): UIRenderer[] {
-    const renderers = this._renderers;
-    renderers.length = 0;
-    this._walk(this.entity, renderers);
-    return renderers;
-  }
-
   get enableBlocked(): boolean {
     return this._enableBlocked;
   }
@@ -196,7 +188,7 @@ export class UICanvas extends Component {
   }
 
   _prepareRender(context: RenderContext): void {
-    const { renderers } = this;
+    const { _renderers: renderers } = this;
     const { frameCount } = this.engine.time;
     const renderElement = (this._renderElement = this.engine._renderElementPool.get());
     this._updateSortDistance(context.virtualCamera.position);
@@ -245,7 +237,7 @@ export class UICanvas extends Component {
    * @internal
    */
   rayCast(ray: Ray, out: HitResult, distance: number = Number.MAX_SAFE_INTEGER): boolean {
-    const { renderers } = this;
+    const { _renderers: renderers } = this;
     for (let i = renderers.length - 1; i >= 0; i--) {
       const renderer = renderers[i];
       if (renderer.rayCastAble && renderer._raycast(ray, out, distance)) {
@@ -253,6 +245,23 @@ export class UICanvas extends Component {
       }
     }
     return false;
+  }
+
+  /**
+   * @internal
+   */
+  addRenderer(renderer: UIRenderer) {
+    renderer && this._renderers.push(renderer);
+  }
+
+  /**
+   * @internal
+   */
+  removeRenderer(renderer: UIRenderer) {
+    const index = this._renderers.indexOf(renderer);
+    if (index !== -1) {
+      this._renderers.splice(index, 1);
+    }
   }
 
   private _adapterPoseInScreenSpace(): void {
@@ -313,39 +322,6 @@ export class UICanvas extends Component {
     }
     this.entity.transform.setScale(expectX, expectY, expectZ);
     this._transform.size.set(curWidth / expectX, curHeight / expectY);
-  }
-
-  private _walk(entity: Entity, renderers: UIRenderer[], group?: CanvasGroup): void {
-    const components = entity._components;
-    const offset = renderers.length;
-    for (let i = 0, n = components.length; i < n; i++) {
-      const component = components[i];
-      if (component.enabled) {
-        switch (component._componentType) {
-          case ComponentType.CanvasGroup:
-            const alpha = group ? group.alpha : 1;
-            group = <CanvasGroup>component;
-            group._globalAlpha = group.ignoreParentGroup ? 1 : alpha * group.alpha;
-            for (let j = offset, m = renderers.length; j < m; j++) {
-              renderers[j]._setGroup(group);
-            }
-            break;
-          case ComponentType.UIRenderer:
-            const uiRenderer = <UIRenderer>component;
-            uiRenderer._canvas = this;
-            uiRenderer._setGroup(group);
-            renderers.push(uiRenderer);
-            break;
-          default:
-            break;
-        }
-      }
-    }
-    const children = entity._children;
-    for (let i = 0, n = children.length; i < n; i++) {
-      const child = children[i];
-      child.isActive && this._walk(child, renderers, group);
-    }
   }
 
   private _addCameraListener(camera: Camera): void {
