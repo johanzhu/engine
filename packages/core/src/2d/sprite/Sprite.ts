@@ -6,6 +6,9 @@ import { Texture2D } from "../../texture/Texture2D";
 import { SpriteModifyFlags } from "../enums/SpriteModifyFlags";
 import { SpriteAtlas } from "../atlas/SpriteAtlas";
 
+
+console.log(3);
+
 /**
  * 2D sprite.
  */
