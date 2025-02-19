@@ -47,6 +47,12 @@
       "collapse": true
     }
   },
+  "UI": {
+    "title": "UI",
+    "theme": {
+      "collapse": true
+    }
+  },
   "xr": {
     "title": "XR",
     "theme": {
@@ -59,6 +65,12 @@
       "collapse": true
     }
   },
+  "platform": {
+    "title": "多平台发布",
+    "theme": {
+      "collapse": true
+    }
+  },
   "device": {
     "title": "设备",
     "theme": {
@@ -67,12 +79,6 @@
   },
   "performance": {
     "title": "性能",
-    "theme": {
-      "collapse": true
-    }
-  },
-  "miniProgram": {
-    "title": "小程序",
     "theme": {
       "collapse": true
     }

@@ -47,6 +47,12 @@
       "collapse": true
     }
   },
+  "UI": {
+    "title": "UI",
+    "theme": {
+      "collapse": true
+    }
+  },
   "xr": {
     "title": "XR",
     "theme": {
@@ -59,6 +65,12 @@
       "collapse": true
     }
   },
+  "platform": {
+    "title": "Platform",
+    "theme": {
+      "collapse": true
+    }
+  },
   "device": {
     "title": "Device",
     "theme": {
@@ -67,12 +79,6 @@
   },
   "performance": {
     "title": "Performance",
-    "theme": {
-      "collapse": true
-    }
-  },
-  "miniProgram": {
-    "title": "Mini Program",
     "theme": {
       "collapse": true
     }
