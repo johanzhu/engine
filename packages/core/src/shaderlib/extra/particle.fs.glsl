@@ -17,15 +17,8 @@ void main() {
 	#endif
 
 	#ifdef MATERIAL_HAS_BASETEXTURE
-		vec4 textureColor = texture2D(material_BaseTexture,v_TextureCoordinate);
-		#ifndef ENGINE_IS_COLORSPACE_GAMMA
-            textureColor = gammaToLinear(textureColor);
-        #endif
-		color *= textureColor;
+		color *= texture2DSRGB(material_BaseTexture, v_TextureCoordinate);
 	#endif
-	gl_FragColor = color; 
-
-	 #ifndef ENGINE_IS_COLORSPACE_GAMMA
-        gl_FragColor = linearToGamma(gl_FragColor);
-    #endif
+	
+	gl_FragColor = color;
 }

@@ -30,8 +30,9 @@ class EXT_texture_webp extends GLTFExtensionParser {
     context: GLTFParserContext,
     schema: EXTWebPSchema,
     textureInfo: ITexture,
-    textureIndex: number
-  ): AssetPromise<Texture2D> {
+    textureIndex: number,
+    isSRGBColorSpace: boolean
+  ): Promise<Texture2D> {
     const webPIndex = schema.source;
     const { sampler, source: fallbackIndex = 0, name: textureName } = textureInfo;
     const texture = GLTFTextureParser._parseTexture(
@@ -39,7 +40,8 @@ class EXT_texture_webp extends GLTFExtensionParser {
       this._supportWebP ? webPIndex : fallbackIndex,
       textureIndex,
       sampler,
-      textureName
+      textureName,
+      isSRGBColorSpace
     );
 
     return texture;

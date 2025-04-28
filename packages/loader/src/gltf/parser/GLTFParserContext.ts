@@ -88,8 +88,8 @@ export class GLTFParserContext {
         if (index === undefined) {
           resource =
             type === GLTFParserType.Entity
-              ? <Entity[]>glTFItems.map((_, index) => this.get<T>(type, index))
-              : AssetPromise.all<T>(glTFItems.map((_, index) => this.get<T>(type, index)));
+              ? <Entity[]>glTFItems.map((_, index) => this.get<Entity>(type, index))
+              : Promise.all<T>(glTFItems.map((_, index) => this.get<T>(type, index)));
         } else {
           resource = parser.parse(this, index);
           isSubAsset && this._handleSubAsset(resource, type, index);
