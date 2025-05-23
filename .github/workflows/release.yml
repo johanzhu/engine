@@ -15,7 +15,8 @@ jobs:
       contents: write
       id-token: write
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout Engine repo
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
@@ -32,11 +33,86 @@ jobs:
           registry-url: https://registry.npmjs.org/
           cache: pnpm
 
-      - name: Build
+      - name: Build Engine
         run: pnpm b:all
 
-      - name: Release current monorepo
-        uses: galacean/publish@v0.2.0
+      - name: Cache Engine Package
+        uses: actions/cache@v3
+        with:
+          path: ./packages/galacean
+          key: ${{ runner.os }}-engine-${{ github.sha }}
+
+      - name: Checkout Sub-repositories
+        run: |
+          git clone https://github.com/galacean/engine-toolkit.git
+          git clone https://github.com/galacean/engine-lottie.git
+          git clone https://github.com/galacean/engine-spine.git -b 4.2
+
+      - name: Checkout editor repository
+        uses: actions/checkout@v4
+        with:
+          repository: galacean/editor
+          submodules: true
+          path: editor
+          token: ${{ secrets.CLONE_EDITOR_TOKEN }}
+
+      - name: Install and Build for editor
+        working-directory: ./editor
+        run: |
+          pnpm install --no-frozen-lockfile
+          pnpm build:decorators
+
+      - name: Install and Link Engine and Build for Toolkit
+        working-directory: ./engine-toolkit
+        run: |
+          pnpm install
+          pnpm link ../packages/galacean
+          pnpm b:all
+
+      - name: Install and Link Engine and Build for Lottie
+        working-directory: ./engine-lottie
+        run: |
+          pnpm install --ignore-workspace
+          pnpm link ../packages/galacean
+          pnpm build
+
+      - name: Install and Link Engine and Build for Spine
+        working-directory: ./engine-spine
+        run: |
+          pnpm install --ignore-workspace --frozen-lockfile=false
+          pnpm link ../packages/galacean
+          pnpm build
+
+      - name: Structure Temp Directory
+        run: |
+          mkdir -p ${{ github.workspace }}/temp
+          mkdir -p ${{ github.workspace }}/temp/@galacean/engine
+          cp -r ${{ github.workspace }}/packages/galacean/dist ${{ github.workspace }}/temp/@galacean/engine
+          mkdir -p ${{ github.workspace }}/temp/@galacean/engine-xr
+          cp -r ${{ github.workspace }}/packages/xr/dist ${{ github.workspace }}/temp/@galacean/engine-xr
+          mkdir -p ${{ github.workspace }}/temp/@galacean/engine-ui
+          cp -r ${{ github.workspace }}/packages/ui/dist ${{ github.workspace }}/temp/@galacean/engine-ui
+          mkdir -p ${{ github.workspace }}/temp/@galacean/engine-shaderlab
+          cp -r ${{ github.workspace }}/packages/shader-lab/dist ${{ github.workspace }}/temp/@galacean/engine-shaderlab
+          mkdir -p ${{ github.workspace }}/temp/@galacean/engine-shader-shaderlab
+          cp -r ${{ github.workspace }}/packages/shader-shaderlab/dist ${{ github.workspace }}/temp/@galacean/engine-shader-shaderlab
+          mkdir -p ${{ github.workspace }}/temp/@galacean/engine-physics-lite
+          cp -r ${{ github.workspace }}/packages/physics-lite/dist ${{ github.workspace }}/temp/@galacean/engine-physics-lite
+          mkdir -p ${{ github.workspace }}/temp/@galacean/engine-physics-physx
+          cp -r ${{ github.workspace }}/packages/physics-physx/dist ${{ github.workspace }}/temp/@galacean/engine-physics-physx
+          mkdir -p ${{ github.workspace }}/temp/@galacean/engine-toolkit
+          cp -r ${{ github.workspace }}/engine-toolkit/packages/galacean-engine-toolkit/dist/umd ${{ github.workspace }}/temp/@galacean/engine-toolkit
+          mkdir -p ${{ github.workspace }}/temp/@galacean/engine-lottie
+          cp -r ${{ github.workspace }}/engine-lottie/dist ${{ github.workspace }}/temp/@galacean/engine-lottie
+          mkdir -p ${{ github.workspace }}/temp/@galacean/engine-spine
+          cp -r ${{ github.workspace }}/engine-spine/dist ${{ github.workspace }}/temp/@galacean/engine-spine
+          mkdir -p ${{ github.workspace }}/temp/@galacean/editor-decorators
+          cp -r ${{ github.workspace }}/editor/packages/decorators/dist ${{ github.workspace }}/temp/@galacean/editor-decorators
+          find ${{ github.workspace }}/temp
+
+      - name: Release engine packages and Sync to CDN
+        uses: galacean/publish@main
+        if: success() || failure()
         env:
           NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
           NPM_CONFIG_PROVENANCE: true

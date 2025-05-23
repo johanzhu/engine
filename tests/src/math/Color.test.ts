@@ -1,5 +1,5 @@
 import { Color } from "@galacean/engine-math";
-import { expect } from "chai";
+import { describe, expect, it } from "vitest";
 
 describe("Color test", () => {
   it("Constructor", () => {
@@ -91,7 +91,7 @@ describe("Color test", () => {
     };
 
     const colorLinear = new Color();
-    const colorGamma = new Color();
+    const colorSRGB = new Color();
     const colorNewLinear = new Color();
 
     for (let i = 0; i < 100; ++i) {
@@ -100,8 +100,8 @@ describe("Color test", () => {
       colorLinear.b = Math.random();
       fixColor(colorLinear);
 
-      colorLinear.toGamma(colorGamma);
-      colorGamma.toLinear(colorNewLinear);
+      colorLinear.toSRGB(colorSRGB);
+      colorSRGB.toLinear(colorNewLinear);
 
       fixColor(colorLinear);
       fixColor(colorNewLinear);

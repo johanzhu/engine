@@ -1,10 +1,7 @@
 import { Camera, Entity, Script } from "@galacean/engine-core";
 import { Vector3 } from "@galacean/engine-math";
 import { WebGLEngine } from "@galacean/engine-rhi-webgl";
-import chai, { expect } from "chai";
-import spies from "chai-spies";
-
-chai.use(spies);
+import { vi, describe, expect, it } from "vitest";
 
 describe("webgl engine test", () => {
   it("create a webgl engine", async () => {
@@ -51,7 +48,6 @@ describe("webgl engine test", () => {
 
     const canvas = document.createElement("canvas");
     const engine = await WebGLEngine.create({ canvas });
-    engine.canvas.resizeByClientSize();
     const scene = engine.sceneManager.activeScene;
     const rootEntity = scene.createRootEntity();
     engine.run();
@@ -75,7 +71,6 @@ describe("webgl engine test", () => {
   it("engine device lost", async () => {
     const canvas = document.createElement("canvas");
     const engine = await WebGLEngine.create({ canvas });
-    engine.canvas.resizeByClientSize();
     const scene = engine.sceneManager.activeScene;
     const rootEntity = scene.createRootEntity();
 
@@ -85,10 +80,10 @@ describe("webgl engine test", () => {
 
     engine.run();
 
-    const opLost = chai.spy(() => {
+    const opLost = vi.fn(() => {
       console.log("On device lost.");
     });
-    const onRestored = chai.spy(() => {
+    const onRestored = vi.fn(() => {
       console.log("On device restored.");
     });
 
@@ -97,7 +92,7 @@ describe("webgl engine test", () => {
 
     engine.forceLoseDevice();
     setTimeout(() => {
-      expect(opLost).to.have.been.called.exactly(1);
+      expect(opLost).toHaveBeenCalledTimes(1);
     }, 100);
 
     setTimeout(() => {

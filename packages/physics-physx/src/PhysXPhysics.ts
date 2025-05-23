@@ -1,8 +1,9 @@
-import { Quaternion, Vector3, version } from "@galacean/engine";
+import { Quaternion, Vector3 } from "@galacean/engine";
 import {
   IBoxColliderShape,
   ICapsuleColliderShape,
   ICharacterController,
+  ICollision,
   IDynamicCollider,
   IFixedJoint,
   IHingeJoint,
@@ -46,9 +47,25 @@ export class PhysXPhysics implements IPhysics {
   private _runTimeMode: PhysXRuntimeMode;
   private _initializeState: InitializeState = InitializeState.Uninitialized;
   private _initializePromise: Promise<void>;
+  private _defaultErrorCallback: any;
+  private _allocator: any;
+  private _tolerancesScale: any;
+  private _wasmModeUrl: string;
+  private _downgradeModeUrl: string;
 
-  constructor(runtimeMode: PhysXRuntimeMode = PhysXRuntimeMode.Auto) {
+  /**
+   * Create a PhysXPhysics instance.
+   * @param runtimeMode - Runtime use WebAssembly mode or downgrade JavaScript mode, `Auto` prefers webAssembly mode if supported @see {@link PhysXRuntimeMode}
+   * @param runtimeUrls - Manually specify the `PhysXRuntimeMode.WebAssembly` mode and `PhysXRuntimeMode.JavaScript` mode URL
+   */
+  constructor(runtimeMode: PhysXRuntimeMode = PhysXRuntimeMode.Auto, runtimeUrls?: PhysXRuntimeUrls) {
     this._runTimeMode = runtimeMode;
+    this._wasmModeUrl =
+      runtimeUrls?.wasmModeUrl ??
+      "https://mdn.alipayobjects.com/rms/afts/file/A*nL1PSrCPoZ0AAAAAAAAAAAAAARQnAQ/physx.release.js";
+    this._downgradeModeUrl =
+      runtimeUrls?.javaScriptModeUrl ??
+      "https://mdn.alipayobjects.com/rms/afts/file/A*ROBqQJEjZXAAAAAAAAAAAAAAARQnAQ/physx.release.downgrade.js";
   }
 
   /**
@@ -89,9 +106,9 @@ export class PhysXPhysics implements IPhysics {
       }
 
       if (runtimeMode == PhysXRuntimeMode.JavaScript) {
-        script.src = `https://mdn.alipayobjects.com/rms/afts/file/A*rnDeR58NNGoAAAAAAAAAAAAAARQnAQ/physx.release.js.js`;
+        script.src = this._downgradeModeUrl;
       } else if (runtimeMode == PhysXRuntimeMode.WebAssembly) {
-        script.src = `https://mdn.alipayobjects.com/rms/afts/file/A*nA97QLQehRMAAAAAAAAAAAAAARQnAQ/physx.release.js`;
+        script.src = this._wasmModeUrl;
       }
     });
 
@@ -122,9 +139,9 @@ export class PhysXPhysics implements IPhysics {
     this._physX.PxCloseExtensions();
     this._pxPhysics.release();
     this._pxFoundation.release();
-    this._physX = null;
-    this._pxFoundation = null;
-    this._pxPhysics = null;
+    this._defaultErrorCallback.delete();
+    this._allocator.delete();
+    this._tolerancesScale.delete();
   }
 
   /**
@@ -139,14 +156,14 @@ export class PhysXPhysics implements IPhysics {
    */
   createPhysicsScene(
     physicsManager: PhysXPhysicsManager,
-    onContactBegin?: (obj1: number, obj2: number) => void,
-    onContactEnd?: (obj1: number, obj2: number) => void,
-    onContactStay?: (obj1: number, obj2: number) => void,
+    onContactBegin?: (collision: ICollision) => void,
+    onContactEnd?: (collision: ICollision) => void,
+    onContactStay?: (collision: ICollision) => void,
     onTriggerBegin?: (obj1: number, obj2: number) => void,
     onTriggerEnd?: (obj1: number, obj2: number) => void,
     onTriggerStay?: (obj1: number, obj2: number) => void
   ): IPhysicsScene {
-    const manager = new PhysXPhysicsScene(
+    const scene = new PhysXPhysicsScene(
       this,
       physicsManager,
       onContactBegin,
@@ -156,7 +173,7 @@ export class PhysXPhysics implements IPhysics {
       onTriggerEnd,
       onTriggerStay
     );
-    return manager;
+    return scene;
   }
 
   /**
@@ -247,17 +264,35 @@ export class PhysXPhysics implements IPhysics {
     return new PhysXSpringJoint(this, collider);
   }
 
+  /**
+   * {@inheritDoc IPhysics.getColliderLayerCollision }
+   */
+  getColliderLayerCollision(layer1: number, layer2: number): boolean {
+    return this._physX.getGroupCollisionFlag(layer1, layer2);
+  }
+
+  /**
+   * {@inheritDoc IPhysics.setColliderLayerCollision }
+   */
+  setColliderLayerCollision(layer1: number, layer2: number, isCollide: boolean): void {
+    this._physX.setGroupCollisionFlag(layer1, layer2, isCollide);
+  }
+
   private _init(physX: any): void {
     const version = physX.PX_PHYSICS_VERSION;
     const defaultErrorCallback = new physX.PxDefaultErrorCallback();
     const allocator = new physX.PxDefaultAllocator();
     const pxFoundation = physX.PxCreateFoundation(version, allocator, defaultErrorCallback);
-    const pxPhysics = physX.PxCreatePhysics(version, pxFoundation, new physX.PxTolerancesScale(), false, null);
+    const tolerancesScale = new physX.PxTolerancesScale();
+    const pxPhysics = physX.PxCreatePhysics(version, pxFoundation, tolerancesScale, false, null);
 
     physX.PxInitExtensions(pxPhysics, null);
     this._physX = physX;
     this._pxFoundation = pxFoundation;
     this._pxPhysics = pxPhysics;
+    this._defaultErrorCallback = defaultErrorCallback;
+    this._allocator = allocator;
+    this._tolerancesScale = tolerancesScale;
   }
 }
 
@@ -265,4 +300,11 @@ enum InitializeState {
   Uninitialized,
   Initializing,
   Initialized
+}
+
+interface PhysXRuntimeUrls {
+  /*** The URL of `PhysXRuntimeMode.WebAssembly` mode. */
+  wasmModeUrl?: string;
+  /*** The URL of `PhysXRuntimeMode.JavaScript` mode. */
+  javaScriptModeUrl?: string;
 }

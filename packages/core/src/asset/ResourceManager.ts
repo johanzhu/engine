@@ -1,3 +1,4 @@
+import { IClone } from "@galacean/engine-design";
 import { ContentRestorer, Engine, EngineObject, Logger, Utils } from "..";
 import { AssetPromise } from "./AssetPromise";
 import { GraphicsResource } from "./GraphicsResource";
@@ -184,7 +185,7 @@ export class ResourceManager {
    * @internal
    */
   _getRemoteUrl(url: string): string {
-    return this._virtualPathMap[url] ?? url;
+    return this._virtualPathResourceMap[url]?.path ?? url;
   }
 
   /**
@@ -206,7 +207,7 @@ export class ResourceManager {
    * @internal
    */
   _onSubAssetSuccess<T>(assetBaseURL: string, assetSubPath: string, value: T): void {
-    const remoteAssetBaseURL = this._virtualPathMap[assetBaseURL] ?? assetBaseURL;
+    const remoteAssetBaseURL = this._virtualPathResourceMap[assetBaseURL]?.path ?? assetBaseURL;
 
     const subPromiseCallback = this._subAssetPromiseCallbacks[remoteAssetBaseURL]?.[assetSubPath];
     if (subPromiseCallback) {
@@ -361,7 +362,8 @@ export class ResourceManager {
     const paths = queryPath ? this._parseQueryPath(queryPath) : [];
 
     // Get remote asset base url
-    const remoteAssetBaseURL = this._virtualPathMap[assetBaseURL] ?? assetBaseURL;
+    const remoteConfig = this._virtualPathResourceMap[assetBaseURL];
+    const remoteAssetBaseURL = remoteConfig?.path ?? assetBaseURL;
 
     // Check cache
     const cacheObject = this._assetUrlPool[remoteAssetBaseURL];
@@ -403,11 +405,14 @@ export class ResourceManager {
       throw `loader not found: ${item.type}`;
     }
 
+    const subpackageName = remoteConfig?.subpackageName;
+
     // Check sub asset
     if (queryPath) {
       // Check whether load main asset
       const mainPromise =
-        loadingPromises[remoteAssetBaseURL] || this._loadMainAsset(loader, item, remoteAssetBaseURL, assetBaseURL);
+        loadingPromises[remoteAssetBaseURL] ||
+        this._loadSubpackageAndMainAsset(loader, item, remoteAssetBaseURL, assetBaseURL, subpackageName);
       mainPromise.catch((e) => {
         this._onSubAssetFail(remoteAssetBaseURL, queryPath, e);
       });
@@ -415,6 +420,17 @@ export class ResourceManager {
       return this._createSubAssetPromiseCallback<T>(remoteAssetBaseURL, remoteAssetURL, queryPath);
     }
 
+    return this._loadSubpackageAndMainAsset(loader, item, remoteAssetBaseURL, assetBaseURL, subpackageName);
+  }
+
+  // For adapter mini-game platform
+  private _loadSubpackageAndMainAsset<T>(
+    loader: Loader<T>,
+    item: LoadItem,
+    remoteAssetBaseURL: string,
+    assetBaseURL: string,
+    subpackageName: string
+  ): AssetPromise<T> {
     return this._loadMainAsset(loader, item, remoteAssetBaseURL, assetBaseURL);
   }
 
@@ -553,37 +569,37 @@ export class ResourceManager {
   /** @internal */
   _objectPool: { [key: string]: any } = Object.create(null);
   /** @internal */
-  _editorResourceConfig: EditorResourceConfig = Object.create(null);
+  _idResourceMap: Record<ResourceId, EditorResourceItem> = Object.create(null);
   /** @internal */
-  _virtualPathMap: Record<string, string> = Object.create(null);
+  _virtualPathResourceMap: Record<VirtualPath, EditorResourceItem> = Object.create(null);
 
   /**
    * @internal
    * @beta Just for internal editor, not recommended for developers.
    */
-  getResourceByRef<T>(ref: { refId: string; key?: string; isClone?: boolean }): Promise<T> {
+  getResourceByRef<T>(ref: { refId: string; key?: string; isClone?: boolean }): AssetPromise<T> {
     const { refId, key, isClone } = ref;
     const obj = this._objectPool[refId];
-    let promise;
+    let promise: AssetPromise<T>;
     if (obj) {
-      promise = Promise.resolve(obj);
+      promise = AssetPromise.resolve(obj);
     } else {
-      const resourceConfig = this._editorResourceConfig[refId];
+      const resourceConfig = this._idResourceMap[refId];
       if (!resourceConfig) {
-        Logger.warn(`refId:${refId} is not find in this._editorResourceConfig.`);
-        return Promise.resolve(null);
+        Logger.warn(`refId:${refId} is not find in this._idResourceMap.`);
+        return AssetPromise.resolve(null);
       }
       let url = resourceConfig.virtualPath;
       if (key) {
         url += "?q=" + key;
       }
 
-      promise = this.load<any>({
+      promise = this.load<T>({
         url,
         type: resourceConfig.type
       });
     }
-    return promise.then((item) => (isClone ? item.clone() : item));
+    return promise.then((item) => (isClone ? <T>(<IClone>item).clone() : item));
   }
 
   /**
@@ -592,10 +608,14 @@ export class ResourceManager {
    */
   initVirtualResources(config: EditorResourceItem[]): void {
     config.forEach((element) => {
-      this._virtualPathMap[element.virtualPath] = element.path;
-      this._editorResourceConfig[element.id] = element;
+      this._virtualPathResourceMap[element.virtualPath] = element;
+      this._idResourceMap[element.id] = element;
+      if (element.dependentAssetMap) {
+        this._virtualPathResourceMap[element.virtualPath].dependentAssetMap = element.dependentAssetMap;
+      }
     });
   }
+
   //-----------------Editor temp solution-----------------
 }
 
@@ -631,8 +651,16 @@ const rePropName = RegExp(
   "g"
 );
 
-type EditorResourceItem = { virtualPath: string; path: string; type: string; id: string };
-type EditorResourceConfig = Record<string, EditorResourceItem>;
+type ResourceId = string;
+type VirtualPath = string;
+type EditorResourceItem = {
+  virtualPath: string;
+  path: string;
+  type: string;
+  id: string;
+  dependentAssetMap?: { [key: string]: string };
+  subpackageName?: string;
+};
 type SubAssetPromiseCallbacks<T> = Record<
   // main asset url, ie. "https://***.glb"
   string,

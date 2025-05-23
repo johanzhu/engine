@@ -8,6 +8,7 @@ import { IPhysicsScene } from "./IPhysicsScene";
 import { IStaticCollider } from "./IStaticCollider";
 import { IFixedJoint, IHingeJoint, ISpringJoint } from "./joints";
 import { IBoxColliderShape, ICapsuleColliderShape, IPlaneColliderShape, ISphereColliderShape } from "./shape";
+import { ICollision } from "./ICollision";
 
 /**
  * The interface of physics creation.
@@ -36,9 +37,9 @@ export interface IPhysics {
    */
   createPhysicsScene(
     physicsManager: IPhysicsManager,
-    onContactEnter?: (obj1: number, obj2: number) => void,
-    onContactExit?: (obj1: number, obj2: number) => void,
-    onContactStay?: (obj1: number, obj2: number) => void,
+    onContactEnter?: (collision: ICollision) => void,
+    onContactExit?: (collision: ICollision) => void,
+    onContactStay?: (collision: ICollision) => void,
     onTriggerEnter?: (obj1: number, obj2: number) => void,
     onTriggerExit?: (obj1: number, obj2: number) => void,
     onTriggerStay?: (obj1: number, obj2: number) => void
@@ -118,19 +119,40 @@ export interface IPhysics {
 
   /**
    * Create fixed joint.
-   * @param collider - Affector of joint
+   * @param collider - collider of joint
    */
   createFixedJoint(collider: ICollider): IFixedJoint;
 
   /**
    * Create hinge joint.
-   * @param collider - Affector of joint
+   * @param collider - collider of joint
    */
   createHingeJoint(collider: ICollider): IHingeJoint;
 
   /**
    * Create spring joint
-   * @param collider - Affector of joint
+   * @param collider - collider of joint
    */
   createSpringJoint(collider: ICollider): ISpringJoint;
+
+  /**
+   * Get whether two collision layers can collide with each other.
+   * @param layer1 - The first collision layer
+   * @param layer2 - The second collision layer
+   * @returns Whether the layers should collide
+   */
+  getColliderLayerCollision(layer1: number, layer2: number): boolean;
+
+  /**
+   * Set whether two collision layers can collide with each other.
+   * @param layer1 - The first collision layer
+   * @param layer2 - The second collision layer
+   * @param isCollide - Whether the layers should collide
+   */
+  setColliderLayerCollision(layer1: number, layer2: number, isCollide: boolean): void;
+
+  /**
+   * Destroy physics scene.
+   */
+  destroy(): void;
 }

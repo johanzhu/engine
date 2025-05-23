@@ -28,10 +28,10 @@ import {
 } from "@galacean/engine-loader";
 import { Color } from "@galacean/engine-math";
 import { WebGLEngine } from "@galacean/engine-rhi-webgl";
-import { expect } from "chai";
+import { describe, beforeAll, afterAll, expect, it } from "vitest";
 
 let engine: WebGLEngine;
-before(async function () {
+beforeAll(async function () {
   const canvasDOM = document.createElement("canvas");
   canvasDOM.width = 1024;
   canvasDOM.height = 1024;
@@ -77,6 +77,21 @@ before(async function () {
           }
         ],
         textures: [
+          {
+            sampler: 0,
+            source: 0,
+            name: "test"
+          },
+          {
+            sampler: 0,
+            source: 0,
+            name: "test"
+          },
+          {
+            sampler: 0,
+            source: 0,
+            name: "test"
+          },
           {
             sampler: 0,
             source: 0,
@@ -188,18 +203,18 @@ before(async function () {
                 }
               },
               metallicRoughnessTexture: {
-                index: 0
+                index: 3
               }
             },
             emissiveTexture: {
               index: 0
             },
             normalTexture: {
-              index: 0,
+              index: 1,
               scale: 2
             },
             occlusionTexture: {
-              index: 0,
+              index: 2,
               strength: 2,
               texCoord: 1
             },
@@ -370,7 +385,7 @@ before(async function () {
   }
 });
 
-after(() => {
+afterAll(() => {
   @registerGLTFParser(GLTFParserType.Schema)
   class test extends GLTFSchemaParser {}
 });
@@ -414,8 +429,7 @@ describe("glTF Loader test", function () {
     const directLight = entities[0].getComponent(SpotLight);
     expect(directLight).to.exist;
     expect(directLight.distance).to.equal(20);
-    expect(directLight.intensity).to.equal(0.5);
-    expect(directLight.color).to.deep.equal(new Color(1, 0, 0, 1));
+    expect(directLight.color).to.deep.equal(new Color(0.5, 0, 0, 1));
     expect(directLight.angle).to.equal(Math.PI / 3);
     expect(directLight.penumbra).to.closeTo(Math.PI / 6, 1e-6);
 
@@ -423,7 +437,7 @@ describe("glTF Loader test", function () {
     expect(defaultSceneRoot).to.instanceOf(Entity);
 
     // texture
-    expect(textures.length).to.equal(1);
+    expect(textures.length).to.equal(4);
     expect(textures[0].name).to.equal("test");
     expect(textures[0].filterMode).to.equal(TextureFilterMode.Trilinear);
     expect(textures[0].wrapModeU).to.equal(TextureWrapMode.Repeat);
@@ -445,6 +459,10 @@ describe("glTF Loader test", function () {
     expect(pbrMaterials[0].clearCoatNormalTexture).to.exist;
     expect(pbrMaterials[2].baseTexture).to.exist;
     expect(pbrMaterials[2].specularGlossinessTexture).to.exist;
+    expect(pbrMaterials[0].baseTexture.isSRGBColorSpace).to.be.true;
+    expect(pbrMaterials[0].roughnessMetallicTexture.isSRGBColorSpace).to.be.false;
+    expect(pbrMaterials[0].normalTexture.isSRGBColorSpace).to.be.false;
+    expect(pbrMaterials[0].occlusionTexture.isSRGBColorSpace).to.be.false;
 
     // mesh
     expect(meshes.length).to.equal(1);

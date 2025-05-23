@@ -8,9 +8,6 @@ import { ShadowType } from "../shadow";
  * Light base class.
  */
 export abstract class Light extends Component {
-  /** Light Intensity */
-  intensity = 1;
-
   /**
    * Culling mask - which layers the light affect.
    * @remarks Support bit manipulation, corresponding to `Layer`.
@@ -23,7 +20,11 @@ export abstract class Light extends Component {
   shadowBias = 1;
   /** Shadow mapping normal-based bias. */
   shadowNormalBias = 1;
-  /** Near plane value to use for shadow frustums. */
+
+  /**
+   * @deprecated
+   * Please use `shadowNearPlaneOffset` instead.
+   */
   shadowNearPlane = 0.1;
 
   /** @internal */
@@ -75,22 +76,5 @@ export abstract class Light extends Component {
     if (!this._inverseViewMat) this._inverseViewMat = new Matrix();
     Matrix.invert(this.viewMatrix, this._inverseViewMat);
     return this._inverseViewMat;
-  }
-
-  /**
-   * @internal
-   */
-  abstract get _shadowProjectionMatrix(): Matrix;
-
-  /**
-   * Light Color, include intensity.
-   * @internal
-   */
-  _getLightIntensityColor(): Color {
-    this._lightColor.r = this.color.r * this.intensity;
-    this._lightColor.g = this.color.g * this.intensity;
-    this._lightColor.b = this.color.b * this.intensity;
-    this._lightColor.a = this.color.a * this.intensity;
-    return this._lightColor;
   }
 }

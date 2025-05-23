@@ -8,6 +8,7 @@ import {
   Entity,
   HitResult,
   Layer,
+  PhysicsScene,
   Script,
   SphereColliderShape,
   StaticCollider
@@ -16,10 +17,7 @@ import { Ray, Vector3 } from "@galacean/engine-math";
 import { LitePhysics } from "@galacean/engine-physics-lite";
 import { PhysXPhysics } from "@galacean/engine-physics-physx";
 import { WebGLEngine } from "@galacean/engine-rhi-webgl";
-import chai, { expect } from "chai";
-import spies from "chai-spies";
-
-chai.use(spies);
+import { vi, describe, beforeAll, expect, it, afterEach } from "vitest";
 
 class CollisionTestScript extends Script {
   useLite: boolean = true;
@@ -82,13 +80,13 @@ function updatePhysics(physics) {
 
 function resetSpy() {
   // reset spy on collision test script.
-  CollisionTestScript.prototype.onCollisionEnter = chai.spy(CollisionTestScript.prototype.onCollisionEnter);
-  CollisionTestScript.prototype.onCollisionStay = chai.spy(CollisionTestScript.prototype.onCollisionStay);
-  CollisionTestScript.prototype.onCollisionExit = chai.spy(CollisionTestScript.prototype.onCollisionExit);
+  CollisionTestScript.prototype.onCollisionEnter = vi.fn(CollisionTestScript.prototype.onCollisionEnter);
+  CollisionTestScript.prototype.onCollisionStay = vi.fn(CollisionTestScript.prototype.onCollisionStay);
+  CollisionTestScript.prototype.onCollisionExit = vi.fn(CollisionTestScript.prototype.onCollisionExit);
 
-  CollisionTestScript.prototype.onTriggerEnter = chai.spy(CollisionTestScript.prototype.onTriggerEnter);
-  CollisionTestScript.prototype.onTriggerStay = chai.spy(CollisionTestScript.prototype.onTriggerStay);
-  CollisionTestScript.prototype.onTriggerExit = chai.spy(CollisionTestScript.prototype.onTriggerExit);
+  CollisionTestScript.prototype.onTriggerEnter = vi.fn(CollisionTestScript.prototype.onTriggerEnter);
+  CollisionTestScript.prototype.onTriggerStay = vi.fn(CollisionTestScript.prototype.onTriggerStay);
+  CollisionTestScript.prototype.onTriggerExit = vi.fn(CollisionTestScript.prototype.onTriggerExit);
 }
 
 /**
@@ -117,13 +115,16 @@ function setColliderProps(entity: Entity, isDynamic: boolean, isTrigger: boolean
 describe("Physics Test", () => {
   describe("LitePhysics", () => {
     let engineLite: WebGLEngine;
-
-    before(async () => {
+    let physics: LitePhysics;
+    let physicsScene: PhysicsScene;
+    beforeAll(async () => {
+      physics = new LitePhysics();
       // Init engine with LitePhysics.
       engineLite = await WebGLEngine.create({
         canvas: document.createElement("canvas"),
-        physics: new LitePhysics()
+        physics
       });
+      physicsScene = engineLite.sceneManager.activeScene.physics;
 
       const rootEntityLitePhysics = engineLite.sceneManager.activeScene.createRootEntity("root_camera");
 
@@ -340,9 +341,37 @@ describe("Physics Test", () => {
       resetSpy();
 
       updatePhysics(engineLite.physicsManager);
-      expect(collisionTestScript.onTriggerEnter).to.have.been.called.exactly(1);
-      expect(collisionTestScript.onTriggerStay).to.have.been.called.exactly(1);
-      expect(collisionTestScript.onTriggerExit).to.have.been.called.exactly(1);
+      expect(collisionTestScript.onTriggerEnter).toHaveBeenCalledTimes(1);
+      expect(collisionTestScript.onTriggerStay).toHaveBeenCalledTimes(1);
+      expect(collisionTestScript.onTriggerExit).toHaveBeenCalledTimes(1);
+    });
+
+    describe("Collision Group Tests", () => {
+      it("should set and get collision group settings correctly", () => {
+        physicsScene.setColliderLayerCollision(Layer.Layer0, Layer.Layer1, true);
+        expect(physicsScene.getColliderLayerCollision(Layer.Layer0, Layer.Layer1)).to.eq(true);
+        physicsScene.setColliderLayerCollision(Layer.Layer0, Layer.Layer2, false);
+        expect(physicsScene.getColliderLayerCollision(Layer.Layer0, Layer.Layer2)).to.eq(false);
+        physicsScene.setColliderLayerCollision(Layer.Layer1, Layer.Layer2, true);
+        expect(physicsScene.getColliderLayerCollision(Layer.Layer1, Layer.Layer2)).to.eq(true);
+      });
+
+      it("should handle edge cases in collision group matrix", () => {
+        const maxGroup = Layer.Layer31;
+
+        physicsScene.setColliderLayerCollision(maxGroup, Layer.Layer0, false);
+        expect(physicsScene.getColliderLayerCollision(maxGroup, Layer.Layer0)).to.eq(false);
+        physicsScene.setColliderLayerCollision(maxGroup, Layer.Layer0, true);
+        expect(physicsScene.getColliderLayerCollision(maxGroup, Layer.Layer0)).to.eq(true);
+      });
+
+      it("should handle invalid collision groups correctly", () => {
+        const invalidGroup = -1;
+        // @ts-ignore
+        expect(() => physicsScene.setColliderLayerCollision(invalidGroup, Layer.Layer0, false)).to.throw();
+        // @ts-ignore
+        expect(() => physicsScene.setColliderLayerCollision(invalidGroup, Layer.Layer0, true)).to.throw();
+      });
     });
 
     afterEach(() => {
@@ -353,13 +382,16 @@ describe("Physics Test", () => {
 
   describe("PhysXPhysics", () => {
     let enginePhysX: WebGLEngine;
+    let physicsScene: PhysicsScene;
 
-    before(async () => {
+    beforeAll(async () => {
       // Init engine with PhysXPhysics.
       enginePhysX = await WebGLEngine.create({
         canvas: document.createElement("canvas"),
         physics: new PhysXPhysics()
       });
+      physicsScene = enginePhysX.sceneManager.activeScene.physics;
+
       const rootEntityPhysX = enginePhysX.sceneManager.activeScene.createRootEntity("root_camera");
 
       const cameraEntityPhysX = rootEntityPhysX.createChild("camera");
@@ -501,6 +533,34 @@ describe("Physics Test", () => {
       root.destroy();
     });
 
+    describe("Collision Group Tests", () => {
+      it("should set and get collision group settings correctly", () => {
+        physicsScene.setColliderLayerCollision(Layer.Layer0, Layer.Layer1, true);
+        expect(physicsScene.getColliderLayerCollision(Layer.Layer0, Layer.Layer1)).to.eq(true);
+        physicsScene.setColliderLayerCollision(Layer.Layer0, Layer.Layer2, false);
+        expect(physicsScene.getColliderLayerCollision(Layer.Layer0, Layer.Layer2)).to.eq(false);
+        physicsScene.setColliderLayerCollision(Layer.Layer1, Layer.Layer2, true);
+        expect(physicsScene.getColliderLayerCollision(Layer.Layer1, Layer.Layer2)).to.eq(true);
+      });
+
+      it("should handle edge cases in collision group matrix", () => {
+        const maxGroup = Layer.Layer31;
+
+        physicsScene.setColliderLayerCollision(maxGroup, Layer.Layer0, false);
+        expect(physicsScene.getColliderLayerCollision(maxGroup, Layer.Layer0)).to.eq(false);
+        physicsScene.setColliderLayerCollision(maxGroup, Layer.Layer0, true);
+        expect(physicsScene.getColliderLayerCollision(maxGroup, Layer.Layer0)).to.eq(true);
+      });
+
+      it("should handle invalid collision groups correctly", () => {
+        const invalidGroup = -1;
+        // @ts-ignore
+        expect(() => physicsScene.setColliderLayerCollision(invalidGroup, Layer.Layer0, false)).to.throw();
+        // @ts-ignore
+        expect(() => physicsScene.setColliderLayerCollision(invalidGroup, Layer.Layer0, true)).to.throw();
+      });
+    });
+
     describe("Collision Test", () => {
       it("Dynamic Trigger vs Dynamic Trigger", () => {
         const physicsMgr = enginePhysX.physicsManager;
@@ -518,12 +578,12 @@ describe("Physics Test", () => {
         setColliderProps(entity2, true, true, false);
         updatePhysics(physicsMgr);
 
-        expect(collisionTestScript.onCollisionEnter).to.have.been.not.called();
-        expect(collisionTestScript.onCollisionStay).to.have.been.not.called();
-        expect(collisionTestScript.onCollisionExit).to.have.been.not.called();
-        expect(collisionTestScript.onTriggerEnter).to.have.been.not.called();
-        expect(collisionTestScript.onTriggerStay).to.have.been.not.called();
-        expect(collisionTestScript.onTriggerExit).to.have.been.not.called();
+        expect(collisionTestScript.onCollisionEnter).not.toHaveBeenCalled();
+        expect(collisionTestScript.onCollisionStay).not.toHaveBeenCalled();
+        expect(collisionTestScript.onCollisionExit).not.toHaveBeenCalled();
+        expect(collisionTestScript.onTriggerEnter).not.toHaveBeenCalled();
+        expect(collisionTestScript.onTriggerStay).not.toHaveBeenCalled();
+        expect(collisionTestScript.onTriggerExit).not.toHaveBeenCalled();
       });
 
       it("Dynamic vs Dynamic", () => {
@@ -542,12 +602,12 @@ describe("Physics Test", () => {
         setColliderProps(entity2, true, false, false);
         updatePhysics(physicsMgr);
 
-        expect(collisionTestScript.onCollisionEnter).to.have.been.called.at.least(1);
-        expect(collisionTestScript.onCollisionStay).to.have.been.called.at.least(1);
-        expect(collisionTestScript.onCollisionExit).to.have.been.called.at.least(1);
-        expect(collisionTestScript.onTriggerEnter).to.have.been.not.called();
-        expect(collisionTestScript.onTriggerStay).to.have.been.not.called();
-        expect(collisionTestScript.onTriggerExit).to.have.been.not.called();
+        expect(collisionTestScript.onCollisionEnter).toHaveBeenCalled();
+        expect(collisionTestScript.onCollisionStay).toHaveBeenCalled();
+        expect(collisionTestScript.onCollisionExit).toHaveBeenCalled();
+        expect(collisionTestScript.onTriggerEnter).not.toHaveBeenCalled();
+        expect(collisionTestScript.onTriggerStay).not.toHaveBeenCalled();
+        expect(collisionTestScript.onTriggerExit).not.toHaveBeenCalled();
       });
 
       it("Static Trigger vs Static Trigger", () => {
@@ -566,12 +626,12 @@ describe("Physics Test", () => {
         setColliderProps(entity2, false, true, false);
         updatePhysics(physicsMgr);
 
-        expect(collisionTestScript.onCollisionEnter).to.have.been.not.called();
-        expect(collisionTestScript.onCollisionStay).to.have.been.not.called();
-        expect(collisionTestScript.onCollisionExit).to.have.been.not.called();
-        expect(collisionTestScript.onTriggerEnter).to.have.been.not.called();
-        expect(collisionTestScript.onTriggerStay).to.have.been.not.called();
-        expect(collisionTestScript.onTriggerExit).to.have.been.not.called();
+        expect(collisionTestScript.onCollisionEnter).not.toHaveBeenCalled();
+        expect(collisionTestScript.onCollisionStay).not.toHaveBeenCalled();
+        expect(collisionTestScript.onCollisionExit).not.toHaveBeenCalled();
+        expect(collisionTestScript.onTriggerEnter).not.toHaveBeenCalled();
+        expect(collisionTestScript.onTriggerStay).not.toHaveBeenCalled();
+        expect(collisionTestScript.onTriggerExit).not.toHaveBeenCalled();
       });
 
       it("Static vs Static", () => {
@@ -590,12 +650,12 @@ describe("Physics Test", () => {
         setColliderProps(entity2, false, false, false);
         updatePhysics(physicsMgr);
 
-        expect(collisionTestScript.onCollisionEnter).to.have.been.not.called();
-        expect(collisionTestScript.onCollisionStay).to.have.been.not.called();
-        expect(collisionTestScript.onCollisionExit).to.have.been.not.called();
-        expect(collisionTestScript.onTriggerEnter).to.have.been.not.called();
-        expect(collisionTestScript.onTriggerStay).to.have.been.not.called();
-        expect(collisionTestScript.onTriggerExit).to.have.been.not.called();
+        expect(collisionTestScript.onCollisionEnter).not.toHaveBeenCalled();
+        expect(collisionTestScript.onCollisionStay).not.toHaveBeenCalled();
+        expect(collisionTestScript.onCollisionExit).not.toHaveBeenCalled();
+        expect(collisionTestScript.onTriggerEnter).not.toHaveBeenCalled();
+        expect(collisionTestScript.onTriggerStay).not.toHaveBeenCalled();
+        expect(collisionTestScript.onTriggerExit).not.toHaveBeenCalled();
       });
 
       it("Static vs Dynamic", () => {
@@ -614,12 +674,12 @@ describe("Physics Test", () => {
         setColliderProps(entity2, true, false, false);
         updatePhysics(physicsMgr);
 
-        expect(collisionTestScript.onCollisionEnter).to.have.been.called.exactly(1);
-        expect(collisionTestScript.onCollisionStay).to.have.been.called.exactly(1);
-        expect(collisionTestScript.onCollisionExit).to.have.been.called.exactly(1);
-        expect(collisionTestScript.onTriggerEnter).to.have.been.not.called();
-        expect(collisionTestScript.onTriggerStay).to.have.been.not.called();
-        expect(collisionTestScript.onTriggerExit).to.have.been.not.called();
+        expect(collisionTestScript.onCollisionEnter).toHaveBeenCalled();
+        expect(collisionTestScript.onCollisionStay).toHaveBeenCalled();
+        expect(collisionTestScript.onCollisionExit).toHaveBeenCalled();
+        expect(collisionTestScript.onTriggerEnter).not.toHaveBeenCalled();
+        expect(collisionTestScript.onTriggerStay).not.toHaveBeenCalled();
+        expect(collisionTestScript.onTriggerExit).not.toHaveBeenCalled();
       });
 
       it("Static Trigger vs Dynamic Trigger", () => {
@@ -638,12 +698,12 @@ describe("Physics Test", () => {
         setColliderProps(entity2, true, true, false);
         updatePhysics(physicsMgr);
 
-        expect(collisionTestScript.onCollisionEnter).to.have.been.not.called();
-        expect(collisionTestScript.onCollisionStay).to.have.been.not.called();
-        expect(collisionTestScript.onCollisionExit).to.have.been.not.called();
-        expect(collisionTestScript.onTriggerEnter).to.have.been.not.called();
-        expect(collisionTestScript.onTriggerStay).to.have.been.not.called();
-        expect(collisionTestScript.onTriggerExit).to.have.been.not.called();
+        expect(collisionTestScript.onCollisionEnter).not.toHaveBeenCalled();
+        expect(collisionTestScript.onCollisionStay).not.toHaveBeenCalled();
+        expect(collisionTestScript.onCollisionExit).not.toHaveBeenCalled();
+        expect(collisionTestScript.onTriggerEnter).not.toHaveBeenCalled();
+        expect(collisionTestScript.onTriggerStay).not.toHaveBeenCalled();
+        expect(collisionTestScript.onTriggerExit).not.toHaveBeenCalled();
       });
 
       it("Static Trigger vs Dynamic", () => {
@@ -662,12 +722,12 @@ describe("Physics Test", () => {
         setColliderProps(entity2, true, false, false);
         updatePhysics(physicsMgr);
 
-        expect(collisionTestScript.onCollisionEnter).to.have.been.not.called();
-        expect(collisionTestScript.onCollisionStay).to.have.been.not.called();
-        expect(collisionTestScript.onCollisionExit).to.have.been.not.called();
-        expect(collisionTestScript.onTriggerEnter).to.have.been.called.exactly(1);
-        expect(collisionTestScript.onTriggerStay).to.have.been.called.exactly(1);
-        expect(collisionTestScript.onTriggerExit).to.have.been.called.exactly(1);
+        expect(collisionTestScript.onCollisionEnter).not.toHaveBeenCalled();
+        expect(collisionTestScript.onCollisionStay).not.toHaveBeenCalled();
+        expect(collisionTestScript.onCollisionExit).not.toHaveBeenCalled();
+        expect(collisionTestScript.onTriggerEnter).toHaveBeenCalled();
+        expect(collisionTestScript.onTriggerStay).toHaveBeenCalled();
+        expect(collisionTestScript.onTriggerExit).toHaveBeenCalled();
       });
 
       it("Static vs Dynamic Trigger", () => {
@@ -686,12 +746,12 @@ describe("Physics Test", () => {
         setColliderProps(entity2, true, true, false);
         updatePhysics(physicsMgr);
 
-        expect(collisionTestScript.onCollisionEnter).to.have.been.not.called();
-        expect(collisionTestScript.onCollisionStay).to.have.been.not.called();
-        expect(collisionTestScript.onCollisionExit).to.have.been.not.called();
-        expect(collisionTestScript.onTriggerEnter).to.have.been.called.exactly(1);
-        expect(collisionTestScript.onTriggerStay).to.have.been.called.exactly(1);
-        expect(collisionTestScript.onTriggerExit).to.have.been.called.exactly(1);
+        expect(collisionTestScript.onCollisionEnter).not.toHaveBeenCalled();
+        expect(collisionTestScript.onCollisionStay).not.toHaveBeenCalled();
+        expect(collisionTestScript.onCollisionExit).not.toHaveBeenCalled();
+        expect(collisionTestScript.onTriggerEnter).toHaveBeenCalled();
+        expect(collisionTestScript.onTriggerStay).toHaveBeenCalled();
+        expect(collisionTestScript.onTriggerExit).toHaveBeenCalled();
       });
 
       it("Dynamic Trigger vs Dynamic", () => {
@@ -710,12 +770,12 @@ describe("Physics Test", () => {
         setColliderProps(entity2, true, false, false);
         updatePhysics(physicsMgr);
 
-        expect(collisionTestScript.onCollisionEnter).to.have.been.not.called();
-        expect(collisionTestScript.onCollisionStay).to.have.been.not.called();
-        expect(collisionTestScript.onCollisionExit).to.have.been.not.called();
-        expect(collisionTestScript.onTriggerEnter).to.have.been.called.exactly(1);
-        expect(collisionTestScript.onTriggerStay).to.have.been.called.gt(1);
-        expect(collisionTestScript.onTriggerExit).to.have.been.called.exactly(1);
+        expect(collisionTestScript.onCollisionEnter).not.toHaveBeenCalled();
+        expect(collisionTestScript.onCollisionStay).not.toHaveBeenCalled();
+        expect(collisionTestScript.onCollisionExit).not.toHaveBeenCalled();
+        expect(collisionTestScript.onTriggerEnter).toHaveBeenCalled();
+        expect(collisionTestScript.onTriggerStay).toHaveBeenCalled();
+        expect(collisionTestScript.onTriggerExit).toHaveBeenCalled();
       });
 
       it("Static Trigger vs Static", () => {
@@ -734,12 +794,12 @@ describe("Physics Test", () => {
         setColliderProps(entity2, false, false, false);
         updatePhysics(physicsMgr);
 
-        expect(collisionTestScript.onCollisionEnter).to.have.been.not.called();
-        expect(collisionTestScript.onCollisionStay).to.have.been.not.called();
-        expect(collisionTestScript.onCollisionExit).to.have.been.not.called();
-        expect(collisionTestScript.onTriggerEnter).to.have.been.not.called();
-        expect(collisionTestScript.onTriggerStay).to.have.been.not.called();
-        expect(collisionTestScript.onTriggerExit).to.have.been.not.called();
+        expect(collisionTestScript.onCollisionEnter).not.toHaveBeenCalled();
+        expect(collisionTestScript.onCollisionStay).not.toHaveBeenCalled();
+        expect(collisionTestScript.onCollisionExit).not.toHaveBeenCalled();
+        expect(collisionTestScript.onTriggerEnter).not.toHaveBeenCalled();
+        expect(collisionTestScript.onTriggerStay).not.toHaveBeenCalled();
+        expect(collisionTestScript.onTriggerExit).not.toHaveBeenCalled();
       });
 
       it("Dynamic Kinematic vs Static", () => {
@@ -758,12 +818,12 @@ describe("Physics Test", () => {
         setColliderProps(entity2, false, false, false);
         updatePhysics(physicsMgr);
 
-        expect(collisionTestScript.onCollisionEnter).to.have.been.not.called();
-        expect(collisionTestScript.onCollisionStay).to.have.been.not.called();
-        expect(collisionTestScript.onCollisionExit).to.have.been.not.called();
-        expect(collisionTestScript.onTriggerEnter).to.have.been.not.called();
-        expect(collisionTestScript.onTriggerStay).to.have.been.not.called();
-        expect(collisionTestScript.onTriggerExit).to.have.been.not.called();
+        expect(collisionTestScript.onCollisionEnter).not.toHaveBeenCalled();
+        expect(collisionTestScript.onCollisionStay).not.toHaveBeenCalled();
+        expect(collisionTestScript.onCollisionExit).not.toHaveBeenCalled();
+        expect(collisionTestScript.onTriggerEnter).not.toHaveBeenCalled();
+        expect(collisionTestScript.onTriggerStay).not.toHaveBeenCalled();
+        expect(collisionTestScript.onTriggerExit).not.toHaveBeenCalled();
       });
 
       it("Dynamic Kinematic vs Dynamic", () => {
@@ -782,12 +842,12 @@ describe("Physics Test", () => {
         setColliderProps(entity2, true, false, false);
         updatePhysics(physicsMgr);
 
-        expect(collisionTestScript.onCollisionEnter).to.have.been.called.exactly(1);
-        expect(collisionTestScript.onCollisionStay).to.have.been.called.gt(1);
-        expect(collisionTestScript.onCollisionExit).to.have.been.called.exactly(1);
-        expect(collisionTestScript.onTriggerEnter).to.have.been.not.called();
-        expect(collisionTestScript.onTriggerStay).to.have.been.not.called();
-        expect(collisionTestScript.onTriggerExit).to.have.been.not.called();
+        expect(collisionTestScript.onCollisionEnter).toHaveBeenCalled();
+        expect(collisionTestScript.onCollisionStay).toHaveBeenCalled();
+        expect(collisionTestScript.onCollisionExit).toHaveBeenCalled();
+        expect(collisionTestScript.onTriggerEnter).not.toHaveBeenCalled();
+        expect(collisionTestScript.onTriggerStay).not.toHaveBeenCalled();
+        expect(collisionTestScript.onTriggerExit).not.toHaveBeenCalled();
       });
 
       it("Dynamic Trigger Kinematic vs Dynamic", () => {
@@ -806,12 +866,12 @@ describe("Physics Test", () => {
         setColliderProps(entity2, true, false, false);
         updatePhysics(physicsMgr);
 
-        expect(collisionTestScript.onCollisionEnter).to.have.been.not.called();
-        expect(collisionTestScript.onCollisionStay).to.have.been.not.called();
-        expect(collisionTestScript.onCollisionExit).to.have.been.not.called();
-        expect(collisionTestScript.onTriggerEnter).to.have.been.called.exactly(1);
-        expect(collisionTestScript.onTriggerStay).to.have.been.called.gt(1);
-        expect(collisionTestScript.onTriggerExit).to.have.been.called.exactly(1);
+        expect(collisionTestScript.onCollisionEnter).not.toHaveBeenCalled();
+        expect(collisionTestScript.onCollisionStay).not.toHaveBeenCalled();
+        expect(collisionTestScript.onCollisionExit).not.toHaveBeenCalled();
+        expect(collisionTestScript.onTriggerEnter).toHaveBeenCalled();
+        expect(collisionTestScript.onTriggerStay).toHaveBeenCalled();
+        expect(collisionTestScript.onTriggerExit).toHaveBeenCalled();
       });
 
       it("Dynamic Kinematic vs Dynamic Kinematic", () => {
@@ -830,12 +890,12 @@ describe("Physics Test", () => {
         setColliderProps(entity2, true, false, true);
         updatePhysics(physicsMgr);
 
-        expect(collisionTestScript.onCollisionEnter).to.have.been.not.called();
-        expect(collisionTestScript.onCollisionStay).to.have.been.not.called();
-        expect(collisionTestScript.onCollisionExit).to.have.been.not.called();
-        expect(collisionTestScript.onTriggerEnter).to.have.been.not.called();
-        expect(collisionTestScript.onTriggerStay).to.have.been.not.called();
-        expect(collisionTestScript.onTriggerExit).to.have.been.not.called();
+        expect(collisionTestScript.onCollisionEnter).not.toHaveBeenCalled();
+        expect(collisionTestScript.onCollisionStay).not.toHaveBeenCalled();
+        expect(collisionTestScript.onCollisionExit).not.toHaveBeenCalled();
+        expect(collisionTestScript.onTriggerEnter).not.toHaveBeenCalled();
+        expect(collisionTestScript.onTriggerStay).not.toHaveBeenCalled();
+        expect(collisionTestScript.onTriggerExit).not.toHaveBeenCalled();
       });
 
       it("Dynamic Trigger Kinematic vs Dynamic Trigger Kinematic", () => {
@@ -854,12 +914,12 @@ describe("Physics Test", () => {
         setColliderProps(entity2, true, true, true);
         updatePhysics(physicsMgr);
 
-        expect(collisionTestScript.onCollisionEnter).to.have.been.not.called();
-        expect(collisionTestScript.onCollisionStay).to.have.been.not.called();
-        expect(collisionTestScript.onCollisionExit).to.have.been.not.called();
-        expect(collisionTestScript.onTriggerEnter).to.have.been.not.called();
-        expect(collisionTestScript.onTriggerStay).to.have.been.not.called();
-        expect(collisionTestScript.onTriggerExit).to.have.been.not.called();
+        expect(collisionTestScript.onCollisionEnter).not.toHaveBeenCalled();
+        expect(collisionTestScript.onCollisionStay).not.toHaveBeenCalled();
+        expect(collisionTestScript.onCollisionExit).not.toHaveBeenCalled();
+        expect(collisionTestScript.onTriggerEnter).not.toHaveBeenCalled();
+        expect(collisionTestScript.onTriggerStay).not.toHaveBeenCalled();
+        expect(collisionTestScript.onTriggerExit).not.toHaveBeenCalled();
       });
 
       it("Static Trigger vs Dynamic Kinematic", () => {
@@ -878,12 +938,12 @@ describe("Physics Test", () => {
         setColliderProps(entity2, true, false, true);
         updatePhysics(physicsMgr);
 
-        expect(collisionTestScript.onCollisionEnter).to.have.been.not.called();
-        expect(collisionTestScript.onCollisionStay).to.have.been.not.called();
-        expect(collisionTestScript.onCollisionExit).to.have.been.not.called();
-        expect(collisionTestScript.onTriggerEnter).to.have.been.called.exactly(1);
-        expect(collisionTestScript.onTriggerStay).to.have.been.called.exactly(1);
-        expect(collisionTestScript.onTriggerExit).to.have.been.called.exactly(1);
+        expect(collisionTestScript.onCollisionEnter).not.toHaveBeenCalled();
+        expect(collisionTestScript.onCollisionStay).not.toHaveBeenCalled();
+        expect(collisionTestScript.onCollisionExit).not.toHaveBeenCalled();
+        expect(collisionTestScript.onTriggerEnter).toHaveBeenCalled();
+        expect(collisionTestScript.onTriggerStay).toHaveBeenCalled();
+        expect(collisionTestScript.onTriggerExit).toHaveBeenCalled();
       });
 
       it("Dynamic Trigger vs Dynamic Kinematic", () => {
@@ -902,12 +962,12 @@ describe("Physics Test", () => {
         setColliderProps(entity2, true, false, true);
         updatePhysics(physicsMgr);
 
-        expect(collisionTestScript.onCollisionEnter).to.have.been.not.called();
-        expect(collisionTestScript.onCollisionStay).to.have.been.not.called();
-        expect(collisionTestScript.onCollisionExit).to.have.been.not.called();
-        expect(collisionTestScript.onTriggerEnter).to.have.been.called.exactly(1);
-        expect(collisionTestScript.onTriggerStay).to.have.been.called.gt(1);
-        expect(collisionTestScript.onTriggerExit).to.have.been.called.exactly(1);
+        expect(collisionTestScript.onCollisionEnter).not.toHaveBeenCalled();
+        expect(collisionTestScript.onCollisionStay).not.toHaveBeenCalled();
+        expect(collisionTestScript.onCollisionExit).not.toHaveBeenCalled();
+        expect(collisionTestScript.onTriggerEnter).toHaveBeenCalled();
+        expect(collisionTestScript.onTriggerStay).toHaveBeenCalled();
+        expect(collisionTestScript.onTriggerExit).toHaveBeenCalled();
       });
 
       it("Dynamic Trigger Kinematic vs Dynamic Kinematic", () => {
@@ -926,12 +986,12 @@ describe("Physics Test", () => {
         setColliderProps(entity2, true, false, true);
         updatePhysics(physicsMgr);
 
-        expect(collisionTestScript.onCollisionEnter).to.have.been.not.called();
-        expect(collisionTestScript.onCollisionStay).to.have.been.not.called();
-        expect(collisionTestScript.onCollisionExit).to.have.been.not.called();
-        expect(collisionTestScript.onTriggerEnter).to.have.been.called.exactly(1);
-        expect(collisionTestScript.onTriggerStay).to.have.been.called.gt(1);
-        expect(collisionTestScript.onTriggerExit).to.have.been.called.exactly(1);
+        expect(collisionTestScript.onCollisionEnter).not.toHaveBeenCalled();
+        expect(collisionTestScript.onCollisionStay).not.toHaveBeenCalled();
+        expect(collisionTestScript.onCollisionExit).not.toHaveBeenCalled();
+        expect(collisionTestScript.onTriggerEnter).toHaveBeenCalled();
+        expect(collisionTestScript.onTriggerStay).toHaveBeenCalled();
+        expect(collisionTestScript.onTriggerExit).toHaveBeenCalled();
       });
 
       it("Dynamic Trigger Kinematic vs Static Trigger", () => {
@@ -950,12 +1010,12 @@ describe("Physics Test", () => {
         setColliderProps(entity2, false, true, false);
         updatePhysics(physicsMgr);
 
-        expect(collisionTestScript.onCollisionEnter).to.have.been.not.called();
-        expect(collisionTestScript.onCollisionStay).to.have.been.not.called();
-        expect(collisionTestScript.onCollisionExit).to.have.been.not.called();
-        expect(collisionTestScript.onTriggerEnter).to.have.been.not.called();
-        expect(collisionTestScript.onTriggerStay).to.have.been.not.called();
-        expect(collisionTestScript.onTriggerExit).to.have.been.not.called();
+        expect(collisionTestScript.onCollisionEnter).not.toHaveBeenCalled();
+        expect(collisionTestScript.onCollisionStay).not.toHaveBeenCalled();
+        expect(collisionTestScript.onCollisionExit).not.toHaveBeenCalled();
+        expect(collisionTestScript.onTriggerEnter).not.toHaveBeenCalled();
+        expect(collisionTestScript.onTriggerStay).not.toHaveBeenCalled();
+        expect(collisionTestScript.onTriggerExit).not.toHaveBeenCalled();
       });
 
       it("Dynamic Trigger Kinematic vs Dynamic Trigger", () => {
@@ -974,12 +1034,12 @@ describe("Physics Test", () => {
         setColliderProps(entity2, true, true, false);
         updatePhysics(physicsMgr);
 
-        expect(collisionTestScript.onCollisionEnter).to.have.been.not.called();
-        expect(collisionTestScript.onCollisionStay).to.have.been.not.called();
-        expect(collisionTestScript.onCollisionExit).to.have.been.not.called();
-        expect(collisionTestScript.onTriggerEnter).to.have.been.not.called();
-        expect(collisionTestScript.onTriggerStay).to.have.been.not.called();
-        expect(collisionTestScript.onTriggerExit).to.have.been.not.called();
+        expect(collisionTestScript.onCollisionEnter).not.toHaveBeenCalled();
+        expect(collisionTestScript.onCollisionStay).not.toHaveBeenCalled();
+        expect(collisionTestScript.onCollisionExit).not.toHaveBeenCalled();
+        expect(collisionTestScript.onTriggerEnter).not.toHaveBeenCalled();
+        expect(collisionTestScript.onTriggerStay).not.toHaveBeenCalled();
+        expect(collisionTestScript.onTriggerExit).not.toHaveBeenCalled();
       });
     });
 

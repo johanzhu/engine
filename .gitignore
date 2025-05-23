@@ -14,7 +14,6 @@ types
 /boilerplates/*/node_modules
 lib
 dist
-dist-miniprogram
 coverage
 .nyc_output
 npm-debug.log*
@@ -25,6 +24,7 @@ AUTHORS
 stats.html
 tsconfig.tsbuildinfo
 api
+docs/api
 yarn.lock
 e2e/videos/*
 e2e/screenshots/*

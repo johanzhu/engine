@@ -1,6 +1,7 @@
 #define IS_METALLIC_WORKFLOW
 #include <common>
 #include <camera_declare>
+#include <transform_declare>
 
 #include <FogFragmentDeclaration>
 
@@ -17,8 +18,4 @@
 void main() {
     #include <pbr_frag>
     #include <FogFragment>
-    
-    #ifndef ENGINE_IS_COLORSPACE_GAMMA
-        gl_FragColor = linearToGamma(gl_FragColor);
-    #endif
 }
